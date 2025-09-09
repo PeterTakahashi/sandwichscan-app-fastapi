@@ -8,7 +8,7 @@ ocrs
 .env
 *.local
 *.local.*
-service_base_test/testdata
+sandwichscan_test/testdata
 .idea
 pyvenv.cfg
 include

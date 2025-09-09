@@ -1,5 +1,5 @@
 [project]
-name = "service-base-fastapi"
+name = "sandwichscan-fastapi"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"

@@ -4,7 +4,6 @@ source =
     app
 omit =
     app/core/config.py
-    app/core/s3.py
     app/to_json.py
     alembic/*
     tests/*

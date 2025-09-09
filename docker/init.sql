@@ -1,4 +1,4 @@
-CREATE DATABASE service_base_dev;
-CREATE DATABASE service_base_test;
-CREATE DATABASE service_base_prod;
-CREATE DATABASE service_base_staging;
+CREATE DATABASE sandwichscan_dev;
+CREATE DATABASE sandwichscan_test;
+CREATE DATABASE sandwichscan_prod;
+CREATE DATABASE sandwichscan_staging;

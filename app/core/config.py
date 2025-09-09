@@ -12,10 +12,10 @@ load_dotenv(dotenv_path=dotenv_path, override=True)
 
 
 class Settings(BaseSettings):
-    PROJECT_NAME: str = "Service Base FastAPI"
+    PROJECT_NAME: str = "Sandwich Scan FastAPI"
     DATABASE_URL: str = os.getenv(
         "DATABASE_URL",
-        "postgresql+asyncpg://postgres:postgres@db:5432/service_base_dev",
+        "postgresql+asyncpg://postgres:postgres@db:5432/sandwichscan_dev",
     )
     FRONTEND_URL: str = os.getenv("FRONTEND_URL", "http://127.0.0.1:5173")
     BACKEND_API_V1_URL: str = os.getenv(
@@ -36,17 +36,12 @@ class Settings(BaseSettings):
     GOOGLE_CLIENT_ID: str = os.getenv("GOOGLE_CLIENT_ID", "")
     GOOGLE_CLIENT_SECRET: str = os.getenv("GOOGLE_CLIENT_SECRET", "")
 
-    S3_ENDPOINT: str = os.getenv("S3_ENDPOINT", "https://s3.amazonaws.com")
-    S3_ACCESS_KEY: str = os.getenv("S3_ACCESS_KEY", "admin")
-    S3_SECRET_KEY: str = os.getenv("S3_SECRET_KEY", "password")
-    S3_BUCKET_NAME: str = os.getenv("S3_BUCKET_NAME", "fastapi-app-dev")
-
     MAIL_USERNAME: str = os.getenv("MAIL_USERNAME", "")
     MAIL_PASSWORD: SecretStr = SecretStr(os.getenv("MAIL_PASSWORD", ""))
     MAIL_FROM: EmailStr = os.getenv("MAIL_FROM", "dev@example.com")
     MAIL_PORT: int = int(os.getenv("MAIL_PORT", "1025"))
     MAIL_WEB_PORT: int = int(os.getenv("MAIL_WEB_PORT", "1080"))
-    MAIL_SERVER: str = os.getenv("MAIL_SERVER", "service-base-sendria")
+    MAIL_SERVER: str = os.getenv("MAIL_SERVER", "sandwichscan-sendria")
     MAIL_STARTTLS: bool = env == "prod"
     USE_CREDENTIALS: bool = env == "prod"
     VALIDATE_CERTS: bool = env == "prod"
