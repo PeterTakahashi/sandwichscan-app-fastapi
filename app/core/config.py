@@ -12,7 +12,7 @@ load_dotenv(dotenv_path=dotenv_path, override=True)
 
 
 class Settings(BaseSettings):
-    PROJECT_NAME: str = "Sandwich Scan FastAPI"
+    PROJECT_NAME: str = "SandwichScan API"
     DATABASE_URL: str = os.getenv(
         "DATABASE_URL",
         "postgresql+asyncpg://postgres:postgres@db:5432/sandwichscan_dev",
