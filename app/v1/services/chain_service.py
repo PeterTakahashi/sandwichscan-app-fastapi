@@ -3,7 +3,6 @@ from app.v1.schemas.chain import (
     ChainListRead,
     ChainSearchParams,
 )
-from app.models.chain import Chain
 from app.repositories.chain_repository import ChainRepository
 
 from app.v1.schemas.common.list.base_list_response import ListResponseMeta

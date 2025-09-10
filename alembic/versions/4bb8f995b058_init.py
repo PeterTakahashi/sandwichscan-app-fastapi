@@ -1,8 +1,8 @@
-"""add chains
+"""init
 
-Revision ID: bba3c41dafa1
-Revises: 11061b015f0b
-Create Date: 2025-09-10 08:09:51.875876
+Revision ID: 4bb8f995b058
+Revises:
+Create Date: 2025-09-10 10:07:03.963181
 
 """
 
@@ -13,8 +13,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = "bba3c41dafa1"
-down_revision: Union[str, None] = "11061b015f0b"
+revision: str = "4bb8f995b058"
+down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -29,6 +29,18 @@ def upgrade() -> None:
         sa.Column("name", sa.String(), nullable=False),
         sa.Column("native_symbol", sa.String(), nullable=False),
         sa.Column("native_decimals", sa.Integer(), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
+        sa.Column(
+            "updated_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("chain_id"),
         sa.UniqueConstraint("name"),
