@@ -27,12 +27,12 @@ async def setup_database():
     await database.disconnect()
 
 
-@pytest_asyncio.fixture(autouse=True)
-async def clean_tables():
-    for table in [
-        "users",
-    ]:
-        await database.execute(f"TRUNCATE TABLE {table} RESTART IDENTITY CASCADE")
+# @pytest_asyncio.fixture(autouse=True)
+# async def clean_tables():
+#     for table in [
+#         "users",
+#     ]:
+#         await database.execute(f"TRUNCATE TABLE {table} RESTART IDENTITY CASCADE")
 
 
 @pytest_asyncio.fixture
