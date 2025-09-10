@@ -1,8 +1,10 @@
 from app.core.routers.api_router import APIRouter
 from app.v1.routers.chains import router as chains_router
+from app.v1.routers.defis import router as defis_router
 
 router = APIRouter()
 
 router.include_router(chains_router)
+router.include_router(defis_router)
 
 api_router = router
