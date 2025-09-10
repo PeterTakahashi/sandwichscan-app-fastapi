@@ -1,4 +1,4 @@
-from app.v1.repositories.token_repository import TokenRepository
+from app.repositories.token_repository import TokenRepository
 from app.db.session import get_async_session
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import Depends

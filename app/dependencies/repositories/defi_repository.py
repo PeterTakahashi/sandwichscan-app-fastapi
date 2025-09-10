@@ -1,4 +1,4 @@
-from app.v1.repositories.defi_repository import DefiRepository
+from app.repositories.defi_repository import DefiRepository
 from app.db.session import get_async_session
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import Depends

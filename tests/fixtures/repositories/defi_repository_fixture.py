@@ -1,5 +1,5 @@
 import pytest_asyncio
-from app.v1.repositories.defi_repository import DefiRepository
+from app.repositories.defi_repository import DefiRepository
 
 
 @pytest_asyncio.fixture

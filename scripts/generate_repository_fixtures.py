@@ -1,11 +1,11 @@
 from pathlib import Path
 
-REPO_DIR = Path("app/v1/repositories")
+REPO_DIR = Path("app/repositories")
 FIXTURE_DIR = Path("tests/fixtures/repositories")
 INIT_FILE = FIXTURE_DIR / "__init__.py"
 
 fixture_template = """import pytest_asyncio
-from app.v1.repositories.{repo_module} import {repo_class}
+from app.repositories.{repo_module} import {repo_class}
 
 
 @pytest_asyncio.fixture

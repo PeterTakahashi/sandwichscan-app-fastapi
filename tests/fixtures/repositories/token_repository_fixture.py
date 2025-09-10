@@ -1,5 +1,5 @@
 import pytest_asyncio
-from app.v1.repositories.token_repository import TokenRepository
+from app.repositories.token_repository import TokenRepository
 
 
 @pytest_asyncio.fixture

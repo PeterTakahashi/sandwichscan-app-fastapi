@@ -1,5 +1,5 @@
 import pytest_asyncio
-from app.v1.repositories.chain_repository import ChainRepository
+from app.repositories.chain_repository import ChainRepository
 
 
 @pytest_asyncio.fixture

@@ -2,7 +2,7 @@ from fastapi import Depends
 from app.models.chain import Chain
 from app.repositories.chain_repository import ChainRepository
 from app.lib.utils.convert_id import decode_id
-from app.v1.dependencies.repositories.chain_repository import (
+from app.dependencies.repositories.chain_repository import (
     get_chain_repository,
 )
 
