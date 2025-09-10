@@ -11,6 +11,7 @@ from .organization_wallet_transaction import OrganizationWalletTransaction
 from .organization_api_key import OrganizationApiKey
 from .organization_address import OrganizationAddress
 from .user_address import UserAddress
+from .chain import Chain
 
 __all__ = [
     "OAuthAccount",
@@ -26,4 +27,5 @@ __all__ = [
     "OrganizationApiKey",
     "OrganizationAddress",
     "UserAddress",
+    "Chain",
 ]
