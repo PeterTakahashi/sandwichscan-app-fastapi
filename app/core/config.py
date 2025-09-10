@@ -1,7 +1,6 @@
 from pydantic_settings import BaseSettings
 import os
 from dotenv import load_dotenv
-from pydantic import EmailStr, SecretStr
 
 env = os.getenv("ENV", "dev")
 if env == "dev":
@@ -36,13 +35,6 @@ class Settings(BaseSettings):
     GOOGLE_CLIENT_ID: str = os.getenv("GOOGLE_CLIENT_ID", "")
     GOOGLE_CLIENT_SECRET: str = os.getenv("GOOGLE_CLIENT_SECRET", "")
 
-    MAIL_USERNAME: str = os.getenv("MAIL_USERNAME", "")
-    MAIL_PASSWORD: SecretStr = SecretStr(os.getenv("MAIL_PASSWORD", ""))
-    MAIL_FROM: EmailStr = os.getenv("MAIL_FROM", "dev@example.com")
-    MAIL_PORT: int = int(os.getenv("MAIL_PORT", "1025"))
-    MAIL_WEB_PORT: int = int(os.getenv("MAIL_WEB_PORT", "1080"))
-    MAIL_SERVER: str = os.getenv("MAIL_SERVER", "sandwichscan-sendria")
-    MAIL_STARTTLS: bool = env == "prod"
     USE_CREDENTIALS: bool = env == "prod"
     VALIDATE_CERTS: bool = env == "prod"
     SECURE_COOKIES: bool = env == "prod"

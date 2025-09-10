@@ -33,15 +33,6 @@ services:
     networks:
       - sandwichscan_default
 
-  sendria:
-    image: msztolcman/sendria:v2.2.2.0
-    container_name: sandwichscan-sendria
-    ports:
-      - "1025:1025" # SMTP
-      - "1080:1080" # Web UI
-    networks:
-      - sandwichscan_default
-
 volumes:
   postgres_data:
 

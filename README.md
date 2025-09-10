@@ -1,6 +1,5 @@
 # Sandwich Scan
 
-
 ## get start
 
 ```
@@ -10,7 +9,6 @@ alembic upgrade head
 ENV=test alembic upgrade head # For test environment
 exit # Exit the container
 ```
-
 
 ## Local Development
 
@@ -37,6 +35,7 @@ exit # Exit the container
   alembic revision --autogenerate -m "init" # Only if starting from scratch or major schema change
   alembic upgrade head
   ENV=test alembic upgrade head # For test environment
+  python -m app.db.seed
   exit
   ```
 - **Create new database migration file:**
@@ -44,6 +43,7 @@ exit # Exit the container
   docker exec -it sandwichscan-web bash
   source .venv/bin/activate
   alembic revision --autogenerate -m "Your migration message here"
+  python -m app.db.seed
   ```
 - **Apply database migrations:**
   ```bash
@@ -69,7 +69,6 @@ exit # Exit the container
   python scripts/generate_repository_dependencies.py
   python scripts/generate_repository_fixtures.py
 ```
-
 
 ### Code Quality
 
