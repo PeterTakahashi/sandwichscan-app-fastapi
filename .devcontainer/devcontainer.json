@@ -1,5 +1,5 @@
 {
-  "name": "Sandwich Scan FastAPI Dev",
+  "name": "SandwichScan API Dev",
   "context": "..",
   "dockerComposeFile": "../compose.yaml",
   "service": "web",
