@@ -16,6 +16,10 @@ from app.db.base import Base
 from app.core.config import settings
 
 from app.models.chain import Chain
+from app.models.defi import Defi
+from app.models.defi_version import DefiVersion
+from app.models.defi_pool import DefiPool
+from app.models.token import Token
 
 load_dotenv()
 

@@ -50,5 +50,175 @@
       "nullable": false,
       "default": "now()"
     }
+  ],
+  "defi_versions": [
+    {
+      "name": "id",
+      "type": "INTEGER",
+      "nullable": false,
+      "default": "nextval('defi_versions_id_seq'::regclass)"
+    },
+    {
+      "name": "defi_id",
+      "type": "INTEGER",
+      "nullable": false,
+      "default": "None"
+    },
+    {
+      "name": "chain_id",
+      "type": "INTEGER",
+      "nullable": false,
+      "default": "None"
+    },
+    {
+      "name": "name",
+      "type": "VARCHAR",
+      "nullable": false,
+      "default": "None"
+    },
+    {
+      "name": "created_at",
+      "type": "TIMESTAMP",
+      "nullable": false,
+      "default": "now()"
+    },
+    {
+      "name": "updated_at",
+      "type": "TIMESTAMP",
+      "nullable": false,
+      "default": "now()"
+    }
+  ],
+  "defis": [
+    {
+      "name": "id",
+      "type": "INTEGER",
+      "nullable": false,
+      "default": "nextval('defis_id_seq'::regclass)"
+    },
+    {
+      "name": "name",
+      "type": "VARCHAR",
+      "nullable": false,
+      "default": "None"
+    },
+    {
+      "name": "created_at",
+      "type": "TIMESTAMP",
+      "nullable": false,
+      "default": "now()"
+    },
+    {
+      "name": "updated_at",
+      "type": "TIMESTAMP",
+      "nullable": false,
+      "default": "now()"
+    }
+  ],
+  "tokens": [
+    {
+      "name": "id",
+      "type": "INTEGER",
+      "nullable": false,
+      "default": "nextval('tokens_id_seq'::regclass)"
+    },
+    {
+      "name": "token_type",
+      "type": "VARCHAR(6)",
+      "nullable": false,
+      "default": "None"
+    },
+    {
+      "name": "chain_id",
+      "type": "INTEGER",
+      "nullable": false,
+      "default": "None"
+    },
+    {
+      "name": "address",
+      "type": "VARCHAR",
+      "nullable": false,
+      "default": "None"
+    },
+    {
+      "name": "symbol",
+      "type": "VARCHAR",
+      "nullable": false,
+      "default": "None"
+    },
+    {
+      "name": "decimals",
+      "type": "INTEGER",
+      "nullable": false,
+      "default": "None"
+    },
+    {
+      "name": "created_at",
+      "type": "TIMESTAMP",
+      "nullable": false,
+      "default": "now()"
+    },
+    {
+      "name": "updated_at",
+      "type": "TIMESTAMP",
+      "nullable": false,
+      "default": "now()"
+    }
+  ],
+  "defi_pools": [
+    {
+      "name": "id",
+      "type": "INTEGER",
+      "nullable": false,
+      "default": "nextval('defi_pools_id_seq'::regclass)"
+    },
+    {
+      "name": "defi_version_id",
+      "type": "INTEGER",
+      "nullable": false,
+      "default": "None"
+    },
+    {
+      "name": "chain_id",
+      "type": "INTEGER",
+      "nullable": false,
+      "default": "None"
+    },
+    {
+      "name": "token0_id",
+      "type": "INTEGER",
+      "nullable": false,
+      "default": "None"
+    },
+    {
+      "name": "token1_id",
+      "type": "INTEGER",
+      "nullable": false,
+      "default": "None"
+    },
+    {
+      "name": "address",
+      "type": "VARCHAR",
+      "nullable": false,
+      "default": "None"
+    },
+    {
+      "name": "swap_fee",
+      "type": "DOUBLE PRECISION",
+      "nullable": false,
+      "default": "None"
+    },
+    {
+      "name": "created_at",
+      "type": "TIMESTAMP",
+      "nullable": false,
+      "default": "now()"
+    },
+    {
+      "name": "updated_at",
+      "type": "TIMESTAMP",
+      "nullable": false,
+      "default": "now()"
+    }
   ]
 }
