@@ -1,8 +1,8 @@
 """init
 
-Revision ID: 0d4d277b577b
+Revision ID: 871991236f47
 Revises: 
-Create Date: 2025-09-10 16:42:58.230660
+Create Date: 2025-09-11 06:49:17.692581
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '0d4d277b577b'
+revision: str = '871991236f47'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -28,6 +28,8 @@ def upgrade() -> None:
     sa.Column('native_symbol', sa.String(), nullable=False),
     sa.Column('native_decimals', sa.Integer(), nullable=False),
     sa.Column('rpc_url', sa.String(), nullable=False),
+    sa.Column('usd_stable_coin_address', sa.String(), nullable=False),
+    sa.Column('logo_url', sa.String(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.PrimaryKeyConstraint('id'),
@@ -37,6 +39,7 @@ def upgrade() -> None:
     op.create_table('defis',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('name', sa.String(), nullable=False),
+    sa.Column('logo_url', sa.String(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.PrimaryKeyConstraint('id'),
@@ -77,7 +80,7 @@ def upgrade() -> None:
     sa.ForeignKeyConstraint(['chain_id'], ['chains.id'], ondelete='CASCADE'),
     sa.ForeignKeyConstraint(['defi_version_id'], ['defi_versions.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('address')
+    sa.UniqueConstraint('chain_id', 'address', name='uq_defi_factories_chain_address')
     )
     op.create_index(op.f('ix_defi_factories_chain_id'), 'defi_factories', ['chain_id'], unique=False)
     op.create_index(op.f('ix_defi_factories_defi_version_id'), 'defi_factories', ['defi_version_id'], unique=False)

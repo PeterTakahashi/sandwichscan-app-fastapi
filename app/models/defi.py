@@ -11,3 +11,5 @@ class Defi(TimestampMixin, Base):
 
     # 'uniswap', 'sushiswap', ...
     name: Mapped[str] = mapped_column(String, nullable=False, unique=True)
+
+    logo_url: Mapped[str] = mapped_column(String, nullable=False, default="")
