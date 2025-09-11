@@ -43,7 +43,7 @@ exit # Exit the container
   docker exec -it sandwichscan-web bash
   source .venv/bin/activate
   alembic revision --autogenerate -m "Your migration message here"
-  python -m app.db.seed
+  alembic upgrade head
   ```
 - **Apply database migrations:**
   ```bash

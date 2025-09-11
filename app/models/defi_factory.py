@@ -27,6 +27,9 @@ class DefiFactory(TimestampMixin, Base):
     )
 
     address: Mapped[str] = mapped_column(String, nullable=False)
+    last_gotten_block_number: Mapped[int] = mapped_column(
+        nullable=False, default=0
+    )
     __table_args__ = (
         UniqueConstraint("chain_id", "address", name="uq_defi_factories_chain_address"),
     )
