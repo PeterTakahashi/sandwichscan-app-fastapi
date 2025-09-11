@@ -1,6 +1,5 @@
 from datetime import datetime
 from pydantic import Field, ConfigDict
-from streamlit import logo
 from app.v1.schemas.common.id_encoder import HasEncodedID
 
 
