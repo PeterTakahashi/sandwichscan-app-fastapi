@@ -8,6 +8,7 @@ class ChainRead(HasEncodedID):
     name: str = Field(..., description="Chain name.")
     native_symbol: str = Field(..., description="Native currency symbol.")
     native_decimals: int = Field(..., description="Native currency decimals.")
+    logo_url: str = Field(..., description="URL of the chain logo.")
 
     created_at: datetime = Field(..., description="Record creation timestamp.")
     updated_at: datetime = Field(..., description="Record update timestamp.")
