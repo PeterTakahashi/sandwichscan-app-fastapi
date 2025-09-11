@@ -260,7 +260,7 @@
     },
     {
       "name": "created_block_number",
-      "type": "INTEGER",
+      "type": "BIGINT",
       "nullable": false,
       "default": "None"
     },
