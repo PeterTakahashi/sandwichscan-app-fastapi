@@ -14,8 +14,8 @@ class DefiPool(TimestampMixin, Base):
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
 
-    defi_version_id: Mapped[int] = mapped_column(
-        ForeignKey("defi_versions.id", ondelete="CASCADE"),
+    defi_factory_id: Mapped[int] = mapped_column(
+        ForeignKey("defi_factories.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
     )

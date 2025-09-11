@@ -1,0 +1,10 @@
+chain_id,name,native_symbol,native_decimals,rpc_url,usd_stable_coin_address
+1,Ethereum,ETH,18,https://eth-mainnet.g.alchemy.com/v2/{ALCHEMY_API_KEY},0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48
+56,BNB Chain,BNB,18,https://bsc-dataseed.bnbchain.org/,0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56
+130,Unichain,UNI,18,https://unichain.drpc.org,0x078D782b760474a361dDA0AF3839290b0EF57AD6
+137,Polygon,MATIC,18,https://polygon-mainnet.g.alchemy.com/v2/{ALCHEMY_API_KEY},0xc2132D05D31c914a87C6611C10748AEb04B58e8F
+480,World Chain,ETH,18,https://worldchain-mainnet.g.alchemy.com/v2/{ALCHEMY_API_KEY},0x79A02482A880bCe3F13E09da970dC34dB4cD24D1
+1868,Soneium,ETH,18,https://soneium-mainnet.g.alchemy.com/v2/{ALCHEMY_API_KEY},0x3A337a6adA9d885b6Ad95ec48F9b75f197b5AE35
+8453,Base,ETH,18,https://base-mainnet.g.alchemy.com/v2/{ALCHEMY_API_KEY},0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913
+42161,Arbitrum,ETH,18,https://arb-mainnet.g.alchemy.com/v2/{ALCHEMY_API_KEY},0xaf88d065e77c8cC2239327C5EDb3A432268e5831
+43114,Avalanche,AVAX,18,https://avax-mainnet.g.alchemy.com/v2/{ALCHEMY_API_KEY},0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E

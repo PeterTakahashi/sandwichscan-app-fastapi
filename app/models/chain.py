@@ -20,3 +20,5 @@ class Chain(TimestampMixin, Base):
 
     # default 18 decimals
     native_decimals: Mapped[int] = mapped_column(Integer, nullable=False, default=18)
+
+    rpc_url: Mapped[str] = mapped_column(String, nullable=False, default="")

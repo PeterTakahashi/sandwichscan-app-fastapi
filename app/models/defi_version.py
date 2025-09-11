@@ -19,11 +19,6 @@ class DefiVersion(TimestampMixin, Base):
         nullable=False,
         index=True,
     )
-    chain_id: Mapped[int] = mapped_column(
-        ForeignKey("chains.id", ondelete="CASCADE"),
-        nullable=False,
-        index=True,
-    )
 
     # 'uniswap-<version>', 'sushiswap-<version>', ...
     name: Mapped[str] = mapped_column(String, nullable=False, unique=True)
