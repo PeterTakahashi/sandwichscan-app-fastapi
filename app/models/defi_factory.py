@@ -5,7 +5,6 @@ from sqlalchemy.orm import Mapped, mapped_column
 from app.models.mixin.timestamp import TimestampMixin
 from sqlalchemy import ForeignKey
 
-from app.models import defi_version
 
 if TYPE_CHECKING:
     pass

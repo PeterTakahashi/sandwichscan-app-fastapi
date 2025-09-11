@@ -1,7 +1,7 @@
 import asyncio
 import csv
 from pathlib import Path
-from typing import Dict, Iterable, List, Optional
+from typing import Dict, List, Optional
 
 from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
@@ -15,9 +15,10 @@ from app.models.defi_factory import DefiFactory
 
 # --- 設定 ---
 CSV_CHAINS = Path("app/db/data/chains.csv")
-CSV_DEFIS  = Path("app/db/data/defis.csv")
+CSV_DEFIS = Path("app/db/data/defis.csv")
 CSV_DEFI_VERSIONS = Path("app/db/data/defi_versions.csv")
 CSV_DEFI_FACTORIES = Path("app/db/data/defi_factories.csv")
+
 
 # CSV -> DB（chains: idempotent upsert）
 async def import_chains_from_csv(csv_path: Path = CSV_CHAINS) -> int:
@@ -35,7 +36,15 @@ async def import_chains_from_csv(csv_path: Path = CSV_CHAINS) -> int:
     rows: List[Dict] = []
     with csv_path.open(newline="", encoding="utf-8") as f:
         reader = csv.DictReader(f)
-        required = {"chain_id", "name", "native_symbol", "native_decimals", "rpc_url", "usd_stable_coin_address", "logo_url"}
+        required = {
+            "chain_id",
+            "name",
+            "native_symbol",
+            "native_decimals",
+            "rpc_url",
+            "usd_stable_coin_address",
+            "logo_url",
+        }
         missing = required - set(reader.fieldnames or [])
         if missing:
             raise ValueError(f"CSV header missing: {missing}")
@@ -74,6 +83,7 @@ async def import_chains_from_csv(csv_path: Path = CSV_CHAINS) -> int:
         await session.commit()
     return len(rows)
 
+
 # CSV -> DB（defis: idempotent upsert）
 async def import_defis_from_csv(csv_path: Path = CSV_DEFIS) -> int:
     rows: List[Dict] = []
@@ -98,13 +108,14 @@ async def import_defis_from_csv(csv_path: Path = CSV_DEFIS) -> int:
             pg_insert(Defi)
             .values(rows)
             .on_conflict_do_update(
-                index_elements=[Defi.name],   # name UNIQUE
+                index_elements=[Defi.name],  # name UNIQUE
                 set_={"name": pg_insert(Defi).excluded.name},
             )
         )
         await session.execute(stmt)
         await session.commit()
     return len(rows)
+
 
 # CSV -> DB（defi_versions: idempotent upsert）
 # csv: "name"（例: uniswap-v2, sushiswap-v3 ...）
@@ -136,7 +147,9 @@ async def import_defi_versions_from_csv(csv_path: Path = CSV_DEFI_VERSIONS) -> i
             # 例: "uniswap-v2" -> "uniswap"
             defi_name = vn.split("-")[0].strip().lower()
             if defi_name not in defi_name_to_id:
-                raise ValueError(f"Defi '{defi_name}' not found for version '{vn}'. Import defis first.")
+                raise ValueError(
+                    f"Defi '{defi_name}' not found for version '{vn}'. Import defis first."
+                )
             rows.append({"defi_id": defi_name_to_id[defi_name], "name": vn})
 
         stmt = (
@@ -153,6 +166,7 @@ async def import_defi_versions_from_csv(csv_path: Path = CSV_DEFI_VERSIONS) -> i
         await session.execute(stmt)
         await session.commit()
         return len(rows)
+
 
 # CSV -> DB（defi_factories: idempotent upsert）
 # csv: chain_name,factory_address,defi_name,defi_version_name
@@ -190,7 +204,9 @@ async def import_defi_factories_from_csv(csv_path: Path = CSV_DEFI_FACTORIES) ->
         chain_name_to_id = {name: cid for (cid, name) in chain_rows}
 
         # version map: name -> id（事前に defi_versions を取り込み済み前提）
-        ver_rows = (await session.execute(select(DefiVersion.id, DefiVersion.name))).all()
+        ver_rows = (
+            await session.execute(select(DefiVersion.id, DefiVersion.name))
+        ).all()
         ver_name_to_id = {name: vid for (vid, name) in ver_rows}
 
         # （任意チェック）defi_name の存在確認（CSV品質担保）
@@ -200,11 +216,17 @@ async def import_defi_factories_from_csv(csv_path: Path = CSV_DEFI_FACTORIES) ->
         rows: List[Dict] = []
         for r in rows_csv:
             if r["chain_name"] not in chain_name_to_id:
-                raise ValueError(f"Chain '{r['chain_name']}' not found. Import chains first.")
+                raise ValueError(
+                    f"Chain '{r['chain_name']}' not found. Import chains first."
+                )
             if r["version_name"] not in ver_name_to_id:
-                raise ValueError(f"DefiVersion '{r['version_name']}' not found. Import defi_versions first.")
+                raise ValueError(
+                    f"DefiVersion '{r['version_name']}' not found. Import defi_versions first."
+                )
             if r["defi_name"] not in defi_name_set:
-                raise ValueError(f"Defi '{r['defi_name']}' not found. Import defis first.")
+                raise ValueError(
+                    f"Defi '{r['defi_name']}' not found. Import defis first."
+                )
 
             rows.append(
                 {
@@ -230,6 +252,7 @@ async def import_defi_factories_from_csv(csv_path: Path = CSV_DEFI_FACTORIES) ->
         await session.commit()
         return len(rows)
 
+
 async def main():
     chains = await import_chains_from_csv()
     print(f"⬆️  Chains upserted: {chains} from {CSV_CHAINS}")
@@ -242,6 +265,7 @@ async def main():
 
     factories = await import_defi_factories_from_csv()
     print(f"⬆️  DefiFactories upserted: {factories} from {CSV_DEFI_FACTORIES}")
+
 
 if __name__ == "__main__":
     asyncio.run(main())

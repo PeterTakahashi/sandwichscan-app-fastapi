@@ -23,6 +23,8 @@ class Chain(TimestampMixin, Base):
 
     rpc_url: Mapped[str] = mapped_column(String, nullable=False, default="")
 
-    usd_stable_coin_address: Mapped[str] = mapped_column(String, nullable=False, default="")
+    usd_stable_coin_address: Mapped[str] = mapped_column(
+        String, nullable=False, default=""
+    )
 
     logo_url: Mapped[str] = mapped_column(String, nullable=False, default="")
