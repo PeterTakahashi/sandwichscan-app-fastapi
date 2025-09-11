@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
 from app.db.base import Base
-from sqlalchemy import String
+from sqlalchemy import String, UniqueConstraint, BigInteger
 from sqlalchemy.orm import Mapped, mapped_column
 from app.models.mixin.timestamp import TimestampMixin
 from sqlalchemy import ForeignKey
@@ -36,5 +36,12 @@ class DefiPool(TimestampMixin, Base):
     )
 
     # 'uniswap-<version>', 'sushiswap-<version>', ...
-    address: Mapped[str] = mapped_column(String, nullable=False, unique=True)
-    swap_fee: Mapped[float] = mapped_column(nullable=False, default=0.003)
+    address: Mapped[str] = mapped_column(String, nullable=False)
+    created_block_number: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    created_tx_hash: Mapped[str] = mapped_column(String, nullable=False)
+    tick_spacing: Mapped[int] = mapped_column(nullable=False, default=0)
+    fee_tier_bps: Mapped[int] = mapped_column(nullable=False, default=0)
+
+    __table_args__ = (
+        UniqueConstraint("chain_id", "address", name="uq_defi_pools_chain_address"),
+    )

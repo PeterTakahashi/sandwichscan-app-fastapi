@@ -1,8 +1,8 @@
 """init
 
-Revision ID: 871991236f47
+Revision ID: 686cbc2b9ddd
 Revises: 
-Create Date: 2025-09-11 06:49:17.692581
+Create Date: 2025-09-11 09:37:11.939020
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '871991236f47'
+revision: str = '686cbc2b9ddd'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -30,8 +30,8 @@ def upgrade() -> None:
     sa.Column('rpc_url', sa.String(), nullable=False),
     sa.Column('usd_stable_coin_address', sa.String(), nullable=False),
     sa.Column('logo_url', sa.String(), nullable=False),
-    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
-    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+    sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
+    sa.Column('updated_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('chain_id'),
     sa.UniqueConstraint('name')
@@ -40,8 +40,8 @@ def upgrade() -> None:
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('name', sa.String(), nullable=False),
     sa.Column('logo_url', sa.String(), nullable=False),
-    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
-    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+    sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
+    sa.Column('updated_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('name')
     )
@@ -49,8 +49,8 @@ def upgrade() -> None:
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('defi_id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(), nullable=False),
-    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
-    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+    sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
+    sa.Column('updated_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
     sa.ForeignKeyConstraint(['defi_id'], ['defis.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('name')
@@ -63,11 +63,11 @@ def upgrade() -> None:
     sa.Column('address', sa.String(), nullable=False),
     sa.Column('symbol', sa.String(), nullable=False),
     sa.Column('decimals', sa.Integer(), nullable=False),
-    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
-    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+    sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
+    sa.Column('updated_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
     sa.ForeignKeyConstraint(['chain_id'], ['chains.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('address')
+    sa.UniqueConstraint('chain_id', 'address', name='uq_tokens_chain_address')
     )
     op.create_index(op.f('ix_tokens_chain_id'), 'tokens', ['chain_id'], unique=False)
     op.create_table('defi_factories',
@@ -75,8 +75,8 @@ def upgrade() -> None:
     sa.Column('defi_version_id', sa.Integer(), nullable=False),
     sa.Column('chain_id', sa.Integer(), nullable=False),
     sa.Column('address', sa.String(), nullable=False),
-    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
-    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+    sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
+    sa.Column('updated_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
     sa.ForeignKeyConstraint(['chain_id'], ['chains.id'], ondelete='CASCADE'),
     sa.ForeignKeyConstraint(['defi_version_id'], ['defi_versions.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id'),
@@ -91,15 +91,18 @@ def upgrade() -> None:
     sa.Column('token0_id', sa.Integer(), nullable=False),
     sa.Column('token1_id', sa.Integer(), nullable=False),
     sa.Column('address', sa.String(), nullable=False),
-    sa.Column('swap_fee', sa.Float(), nullable=False),
-    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
-    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+    sa.Column('created_block_number', sa.BigInteger(), nullable=False),
+    sa.Column('created_tx_hash', sa.String(), nullable=False),
+    sa.Column('tick_spacing', sa.Integer(), nullable=False),
+    sa.Column('fee_tier_bps', sa.Integer(), nullable=False),
+    sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
+    sa.Column('updated_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
     sa.ForeignKeyConstraint(['chain_id'], ['chains.id'], ondelete='CASCADE'),
     sa.ForeignKeyConstraint(['defi_factory_id'], ['defi_factories.id'], ondelete='CASCADE'),
     sa.ForeignKeyConstraint(['token0_id'], ['tokens.id'], ondelete='CASCADE'),
     sa.ForeignKeyConstraint(['token1_id'], ['tokens.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('address')
+    sa.UniqueConstraint('chain_id', 'address', name='uq_defi_pools_chain_address')
     )
     op.create_index(op.f('ix_defi_pools_chain_id'), 'defi_pools', ['chain_id'], unique=False)
     op.create_index(op.f('ix_defi_pools_defi_factory_id'), 'defi_pools', ['defi_factory_id'], unique=False)

@@ -2,7 +2,7 @@ from typing import TYPE_CHECKING
 from app.db.base import Base
 from sqlalchemy.orm import Mapped, mapped_column
 from app.models.mixin.timestamp import TimestampMixin
-from sqlalchemy import ForeignKey, Enum as SQLAlchemyEnum, String
+from sqlalchemy import ForeignKey, Enum as SQLAlchemyEnum, String, UniqueConstraint
 from app.models.enums.token import TokenType
 
 
@@ -28,6 +28,10 @@ class Token(TimestampMixin, Base):
     )
 
     # 'uniswap-<version>', 'sushiswap-<version>', ...
-    address: Mapped[str] = mapped_column(String, nullable=False, unique=True)
+    address: Mapped[str] = mapped_column(String, nullable=False)
     symbol: Mapped[str] = mapped_column(String, nullable=False)
     decimals: Mapped[int] = mapped_column(nullable=False)
+
+    __table_args__ = (
+        UniqueConstraint("chain_id", "address", name="uq_tokens_chain_address"),
+    )

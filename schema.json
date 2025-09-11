@@ -7,6 +7,70 @@
       "default": "None"
     }
   ],
+  "defis": [
+    {
+      "name": "id",
+      "type": "INTEGER",
+      "nullable": false,
+      "default": "nextval('defis_id_seq'::regclass)"
+    },
+    {
+      "name": "name",
+      "type": "VARCHAR",
+      "nullable": false,
+      "default": "None"
+    },
+    {
+      "name": "logo_url",
+      "type": "VARCHAR",
+      "nullable": false,
+      "default": "None"
+    },
+    {
+      "name": "created_at",
+      "type": "TIMESTAMP",
+      "nullable": false,
+      "default": "now()"
+    },
+    {
+      "name": "updated_at",
+      "type": "TIMESTAMP",
+      "nullable": false,
+      "default": "now()"
+    }
+  ],
+  "defi_versions": [
+    {
+      "name": "id",
+      "type": "INTEGER",
+      "nullable": false,
+      "default": "nextval('defi_versions_id_seq'::regclass)"
+    },
+    {
+      "name": "defi_id",
+      "type": "INTEGER",
+      "nullable": false,
+      "default": "None"
+    },
+    {
+      "name": "name",
+      "type": "VARCHAR",
+      "nullable": false,
+      "default": "None"
+    },
+    {
+      "name": "created_at",
+      "type": "TIMESTAMP",
+      "nullable": false,
+      "default": "now()"
+    },
+    {
+      "name": "updated_at",
+      "type": "TIMESTAMP",
+      "nullable": false,
+      "default": "now()"
+    }
+  ],
   "chains": [
     {
       "name": "id",
@@ -39,65 +103,19 @@
       "default": "None"
     },
     {
-      "name": "created_at",
-      "type": "TIMESTAMP",
-      "nullable": false,
-      "default": "now()"
-    },
-    {
-      "name": "updated_at",
-      "type": "TIMESTAMP",
-      "nullable": false,
-      "default": "now()"
-    }
-  ],
-  "defi_versions": [
-    {
-      "name": "id",
-      "type": "INTEGER",
-      "nullable": false,
-      "default": "nextval('defi_versions_id_seq'::regclass)"
-    },
-    {
-      "name": "defi_id",
-      "type": "INTEGER",
-      "nullable": false,
-      "default": "None"
-    },
-    {
-      "name": "chain_id",
-      "type": "INTEGER",
-      "nullable": false,
-      "default": "None"
-    },
-    {
-      "name": "name",
+      "name": "rpc_url",
       "type": "VARCHAR",
       "nullable": false,
       "default": "None"
     },
     {
-      "name": "created_at",
-      "type": "TIMESTAMP",
+      "name": "usd_stable_coin_address",
+      "type": "VARCHAR",
       "nullable": false,
-      "default": "now()"
+      "default": "None"
     },
     {
-      "name": "updated_at",
-      "type": "TIMESTAMP",
-      "nullable": false,
-      "default": "now()"
-    }
-  ],
-  "defis": [
-    {
-      "name": "id",
-      "type": "INTEGER",
-      "nullable": false,
-      "default": "nextval('defis_id_seq'::regclass)"
-    },
-    {
-      "name": "name",
+      "name": "logo_url",
       "type": "VARCHAR",
       "nullable": false,
       "default": "None"
@@ -165,6 +183,44 @@
       "default": "now()"
     }
   ],
+  "defi_factories": [
+    {
+      "name": "id",
+      "type": "INTEGER",
+      "nullable": false,
+      "default": "nextval('defi_factories_id_seq'::regclass)"
+    },
+    {
+      "name": "defi_version_id",
+      "type": "INTEGER",
+      "nullable": false,
+      "default": "None"
+    },
+    {
+      "name": "chain_id",
+      "type": "INTEGER",
+      "nullable": false,
+      "default": "None"
+    },
+    {
+      "name": "address",
+      "type": "VARCHAR",
+      "nullable": false,
+      "default": "None"
+    },
+    {
+      "name": "created_at",
+      "type": "TIMESTAMP",
+      "nullable": false,
+      "default": "now()"
+    },
+    {
+      "name": "updated_at",
+      "type": "TIMESTAMP",
+      "nullable": false,
+      "default": "now()"
+    }
+  ],
   "defi_pools": [
     {
       "name": "id",
@@ -173,7 +229,7 @@
       "default": "nextval('defi_pools_id_seq'::regclass)"
     },
     {
-      "name": "defi_version_id",
+      "name": "defi_factory_id",
       "type": "INTEGER",
       "nullable": false,
       "default": "None"
@@ -203,8 +259,26 @@
       "default": "None"
     },
     {
-      "name": "swap_fee",
-      "type": "DOUBLE PRECISION",
+      "name": "created_block_number",
+      "type": "INTEGER",
+      "nullable": false,
+      "default": "None"
+    },
+    {
+      "name": "created_tx_hash",
+      "type": "VARCHAR",
+      "nullable": false,
+      "default": "None"
+    },
+    {
+      "name": "tick_spacing",
+      "type": "INTEGER",
+      "nullable": false,
+      "default": "None"
+    },
+    {
+      "name": "fee_tier_bps",
+      "type": "INTEGER",
       "nullable": false,
       "default": "None"
     },
