@@ -33,7 +33,10 @@ class Settings(BaseSettings):
     ENV: str = env
 
     ALCHEMY_API_KEY: str = os.getenv("ALCHEMY_API_KEY", "")
-
+    GOOGLE_CLOUD_PROJECT: str = os.getenv("GOOGLE_CLOUD_PROJECT", "")
+    GOOGLE_APPLICATION_CREDENTIALS: str = os.getenv(
+        "GOOGLE_APPLICATION_CREDENTIALS", ""
+    )
 
 settings = Settings()
 
