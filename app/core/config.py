@@ -20,16 +20,8 @@ class Settings(BaseSettings):
     BACKEND_API_V1_URL: str = os.getenv(
         "BACKEND_API_V1_URL", "http://127.0.0.1:8000/app/v1"
     )
-    RESET_PASSWORD_TOKEN_SECRET: str = "SECRET"
-    VERIFICATION_TOKEN_SECRET: str = "SECRET"
-    JWT_SECRET: str = "SECRET"
     HASHIDS_MIN_LENGTH: int = 12
     HASHIDS_SALT: str = os.getenv("HASHIDS_SALT", "SECRET")
-    ACCESS_TOKEN_EXPIRED_SECONDS: int = 3600 * 24 * 7  # 1 week
-
-    USE_CREDENTIALS: bool = env == "prod"
-    VALIDATE_CERTS: bool = env == "prod"
-    SECURE_COOKIES: bool = env == "prod"
     ENV: str = env
 
     ALCHEMY_API_KEY: str = os.getenv("ALCHEMY_API_KEY", "")

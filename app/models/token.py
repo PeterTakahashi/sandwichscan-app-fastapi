@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
 from app.db.base import Base
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.models.mixin.timestamp import TimestampMixin
 from sqlalchemy import (
     ForeignKey,
@@ -13,7 +13,7 @@ from app.models.enums.token import TokenType
 
 
 if TYPE_CHECKING:
-    pass
+    from app.models.chain import Chain
 
 
 class Token(TimestampMixin, Base):
@@ -44,3 +44,4 @@ class Token(TimestampMixin, Base):
     __table_args__ = (
         UniqueConstraint("chain_id", "address", name="uq_tokens_chain_address"),
     )
+    chain: Mapped["Chain"] = relationship("Chain", back_populates="tokens")
