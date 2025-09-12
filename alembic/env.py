@@ -21,6 +21,9 @@ from app.models.defi_version import DefiVersion
 from app.models.defi_factory import DefiFactory
 from app.models.defi_pool import DefiPool
 from app.models.token import Token
+from app.models.transaction import Transaction
+from app.models.swap import Swap
+from app.models.sandwich_attack import SandwichAttack
 
 load_dotenv()
 

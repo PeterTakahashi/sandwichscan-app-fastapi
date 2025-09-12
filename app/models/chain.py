@@ -8,6 +8,7 @@ from typing import List
 if TYPE_CHECKING:
     from app.models.defi_factory import DefiFactory
     from app.models.token import Token
+    from app.models.transaction import Transaction
 
 
 class Chain(TimestampMixin, Base):
@@ -43,4 +44,7 @@ class Chain(TimestampMixin, Base):
     )
     tokens: Mapped[List["Token"]] = relationship(
         "Token", back_populates="chain", cascade="all, delete-orphan"
+    )
+    transactions: Mapped[List["Transaction"]] = relationship(
+        "Transaction", back_populates="chain", cascade="all, delete-orphan"
     )
