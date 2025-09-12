@@ -89,3 +89,15 @@ exit # Exit the container
   ruff check .
   mypy --config-file mypy.ini .
   ```
+
+### insert blockchain data from bigquery
+
+```sh
+python -m app.db.services.backfill_from_bigquery
+```
+
+### sql dump
+
+```sh
+docker exec -t sandwichscan-db pg_dump -U postgres -d sandwichscan_dev > dump.sql
+```

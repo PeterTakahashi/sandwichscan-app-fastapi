@@ -38,6 +38,7 @@ class Settings(BaseSettings):
         "GOOGLE_APPLICATION_CREDENTIALS", ""
     )
 
+
 settings = Settings()
 
 print("Loading environment variables...")

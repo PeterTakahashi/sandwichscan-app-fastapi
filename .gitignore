@@ -50,3 +50,5 @@ coverage.txt
 htmlcov
 
 google_credential.json
+
+dump.sql

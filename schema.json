@@ -115,6 +115,18 @@
       "default": "None"
     },
     {
+      "name": "last_block_number",
+      "type": "INTEGER",
+      "nullable": false,
+      "default": "None"
+    },
+    {
+      "name": "big_query_table_id",
+      "type": "VARCHAR",
+      "nullable": false,
+      "default": "None"
+    },
+    {
       "name": "logo_url",
       "type": "VARCHAR",
       "nullable": false,
@@ -205,6 +217,18 @@
     {
       "name": "address",
       "type": "VARCHAR",
+      "nullable": false,
+      "default": "None"
+    },
+    {
+      "name": "last_gotten_block_number",
+      "type": "INTEGER",
+      "nullable": false,
+      "default": "None"
+    },
+    {
+      "name": "created_block_number",
+      "type": "BIGINT",
       "nullable": false,
       "default": "None"
     },

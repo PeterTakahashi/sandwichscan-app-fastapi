@@ -1,8 +1,8 @@
 """init
 
-Revision ID: 686cbc2b9ddd
+Revision ID: 51e8ee936fc5
 Revises:
-Create Date: 2025-09-11 09:37:11.939020
+Create Date: 2025-09-12 13:48:05.276650
 
 """
 
@@ -13,7 +13,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = "686cbc2b9ddd"
+revision: str = "51e8ee936fc5"
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -31,6 +31,8 @@ def upgrade() -> None:
         sa.Column("native_decimals", sa.Integer(), nullable=False),
         sa.Column("rpc_url", sa.String(), nullable=False),
         sa.Column("usd_stable_coin_address", sa.String(), nullable=False),
+        sa.Column("last_block_number", sa.Integer(), nullable=False),
+        sa.Column("big_query_table_id", sa.String(), nullable=False),
         sa.Column("logo_url", sa.String(), nullable=False),
         sa.Column(
             "created_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False
@@ -84,6 +86,7 @@ def upgrade() -> None:
         sa.Column("address", sa.String(), nullable=False),
         sa.Column("symbol", sa.String(), nullable=False),
         sa.Column("decimals", sa.Integer(), nullable=False),
+        sa.Column("decimals_invalid", sa.Boolean(), nullable=False),
         sa.Column(
             "created_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False
         ),
@@ -101,6 +104,8 @@ def upgrade() -> None:
         sa.Column("defi_version_id", sa.Integer(), nullable=False),
         sa.Column("chain_id", sa.Integer(), nullable=False),
         sa.Column("address", sa.String(), nullable=False),
+        sa.Column("last_gotten_block_number", sa.Integer(), nullable=False),
+        sa.Column("created_block_number", sa.BigInteger(), nullable=False),
         sa.Column(
             "created_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False
         ),

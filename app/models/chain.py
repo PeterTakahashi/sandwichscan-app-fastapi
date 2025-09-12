@@ -1,8 +1,12 @@
+from typing import TYPE_CHECKING
 from app.db.base import Base
 from sqlalchemy import Integer, String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.models.mixin.timestamp import TimestampMixin
+from typing import List
 
+if TYPE_CHECKING:
+    from app.models.defi_factory import DefiFactory
 
 class Chain(TimestampMixin, Base):
     __tablename__ = "chains"
@@ -27,4 +31,11 @@ class Chain(TimestampMixin, Base):
         String, nullable=False, default=""
     )
 
+    last_block_number: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    big_query_table_id: Mapped[str] = mapped_column(String, nullable=False, default="")
+
     logo_url: Mapped[str] = mapped_column(String, nullable=False, default="")
+
+    defi_factories: Mapped[List["DefiFactory"]] = relationship(
+        "DefiFactory", back_populates="chain", cascade="all, delete-orphan"
+    )

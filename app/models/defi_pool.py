@@ -1,12 +1,12 @@
 from typing import TYPE_CHECKING
 from app.db.base import Base
 from sqlalchemy import String, UniqueConstraint, BigInteger
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import relationship, Mapped, mapped_column
 from app.models.mixin.timestamp import TimestampMixin
 from sqlalchemy import ForeignKey
 
 if TYPE_CHECKING:
-    pass
+    from app.models.defi_factory import DefiFactory
 
 
 class DefiPool(TimestampMixin, Base):
@@ -45,3 +45,5 @@ class DefiPool(TimestampMixin, Base):
     __table_args__ = (
         UniqueConstraint("chain_id", "address", name="uq_defi_pools_chain_address"),
     )
+
+    defi_factory: Mapped["DefiFactory"] = relationship("DefiFactory", back_populates="defi_pools")

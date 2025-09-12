@@ -44,6 +44,7 @@ async def import_chains_from_csv(csv_path: Path = CSV_CHAINS) -> int:
             "rpc_url",
             "usd_stable_coin_address",
             "logo_url",
+            "big_query_table_id",
         }
         missing = required - set(reader.fieldnames or [])
         if missing:
@@ -59,6 +60,7 @@ async def import_chains_from_csv(csv_path: Path = CSV_CHAINS) -> int:
                     "rpc_url": expand_macros(r["rpc_url"].strip()),
                     "usd_stable_coin_address": r["usd_stable_coin_address"].strip(),
                     "logo_url": r["logo_url"].strip(),
+                    "big_query_table_id": r["big_query_table_id"].strip(),
                 }
             )
 
@@ -76,6 +78,11 @@ async def import_chains_from_csv(csv_path: Path = CSV_CHAINS) -> int:
                     "native_symbol": pg_insert(Chain).excluded.native_symbol,
                     "native_decimals": pg_insert(Chain).excluded.native_decimals,
                     "rpc_url": pg_insert(Chain).excluded.rpc_url,
+                    "usd_stable_coin_address": pg_insert(
+                        Chain
+                    ).excluded.usd_stable_coin_address,
+                    "logo_url": pg_insert(Chain).excluded.logo_url,
+                    "big_query_table_id": pg_insert(Chain).excluded.big_query_table_id,
                 },
             )
         )
