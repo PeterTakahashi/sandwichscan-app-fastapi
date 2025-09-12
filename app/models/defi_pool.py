@@ -46,4 +46,6 @@ class DefiPool(TimestampMixin, Base):
         UniqueConstraint("chain_id", "address", name="uq_defi_pools_chain_address"),
     )
 
-    defi_factory: Mapped["DefiFactory"] = relationship("DefiFactory", back_populates="defi_pools")
+    defi_factory: Mapped["DefiFactory"] = relationship(
+        "DefiFactory", back_populates="defi_pools"
+    )

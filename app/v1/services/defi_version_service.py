@@ -16,13 +16,15 @@ class DefiVersionService:
     ):
         self.defi_version_repository = defi_version_repository
 
-    async def get_list(self, search_params: DefiVersionSearchParams) -> DefiVersionListRead:
+    async def get_list(
+        self, search_params: DefiVersionSearchParams
+    ) -> DefiVersionListRead:
         """
         Retrieve a list of defi_versions with filtering, sorting, and pagination.
         """
         defi_versions = await self.defi_version_repository.where(
             **search_params.model_dump(exclude_none=True),
-            joinedload_models=[DefiVersion.defi]
+            joinedload_models=[DefiVersion.defi],
         )
         total_count = await self.defi_version_repository.count(
             **search_params.model_dump(

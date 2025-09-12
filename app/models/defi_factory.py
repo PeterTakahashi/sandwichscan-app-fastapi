@@ -37,7 +37,9 @@ class DefiFactory(TimestampMixin, Base):
         UniqueConstraint("chain_id", "address", name="uq_defi_factories_chain_address"),
     )
 
-    defi_version: Mapped["DefiVersion"] = relationship("DefiVersion", back_populates="defi_factories")
+    defi_version: Mapped["DefiVersion"] = relationship(
+        "DefiVersion", back_populates="defi_factories"
+    )
     chain: Mapped["Chain"] = relationship("Chain", back_populates="defi_factories")
     defi_pools: Mapped[List["DefiPool"]] = relationship(
         "DefiPool", back_populates="defi_factory", cascade="all, delete-orphan"

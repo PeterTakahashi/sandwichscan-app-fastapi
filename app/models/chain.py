@@ -8,6 +8,7 @@ from typing import List
 if TYPE_CHECKING:
     from app.models.defi_factory import DefiFactory
 
+
 class Chain(TimestampMixin, Base):
     __tablename__ = "chains"
 

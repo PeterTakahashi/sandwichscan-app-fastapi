@@ -7,6 +7,7 @@ from typing import List, TYPE_CHECKING
 if TYPE_CHECKING:
     from app.models.defi_version import DefiVersion
 
+
 class Defi(TimestampMixin, Base):
     __tablename__ = "defis"
 

@@ -9,7 +9,11 @@ from app.dependencies.repositories.defi_version_repository import (
 
 async def get_defi_version_by_id(
     defi_version_id: str,
-    defi_version_repository: DefiVersionRepository = Depends(get_defi_version_repository),
+    defi_version_repository: DefiVersionRepository = Depends(
+        get_defi_version_repository
+    ),
 ) -> DefiVersion:
-    defi_version = await defi_version_repository.find_by_or_raise(id=decode_id(defi_version_id))
+    defi_version = await defi_version_repository.find_by_or_raise(
+        id=decode_id(defi_version_id)
+    )
     return defi_version

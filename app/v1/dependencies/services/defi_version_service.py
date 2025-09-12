@@ -7,7 +7,9 @@ from app.dependencies.repositories.defi_version_repository import (
 
 
 def get_defi_version_service(
-    defi_version_repository: DefiVersionRepository = Depends(get_defi_version_repository),
+    defi_version_repository: DefiVersionRepository = Depends(
+        get_defi_version_repository
+    ),
 ) -> DefiVersionService:
     return DefiVersionService(
         defi_version_repository=defi_version_repository,

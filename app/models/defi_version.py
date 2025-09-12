@@ -10,6 +10,7 @@ if TYPE_CHECKING:
     from app.models.defi_factory import DefiFactory
     from app.models.defi import Defi
 
+
 class DefiVersion(TimestampMixin, Base):
     __tablename__ = "defi_versions"
 
