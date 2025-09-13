@@ -30,6 +30,7 @@ services:
       - "8888:8888" # for jupyter notebook when debugging
     depends_on:
       - db
+    cpus: 12
     networks:
       - sandwichscan_default
 

@@ -96,6 +96,10 @@ exit # Exit the container
 python -m app.db.services.backfill_from_bigquery
 ```
 
+```sh
+python -m app.db.services.backfill_transactions_uniswap_from_bigquery
+```
+
 ### sql dump
 
 ```sh

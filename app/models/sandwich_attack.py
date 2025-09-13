@@ -1,5 +1,5 @@
 from app.db.base import Base
-from sqlalchemy import String, Integer, Numeric
+from sqlalchemy import String, Numeric
 from sqlalchemy.orm import Mapped, mapped_column
 from app.models.mixin.timestamp import TimestampMixin
 from sqlalchemy import ForeignKey, UniqueConstraint, Index
@@ -40,25 +40,41 @@ class SandwichAttack(TimestampMixin, Base):
     )
 
     # 経済量（raw=整数、正規化=小数）
-    victim_base_size_raw: Mapped[int | None] = mapped_column(Numeric(78, 0), nullable=True)
+    victim_base_size_raw: Mapped[int | None] = mapped_column(
+        Numeric(78, 0), nullable=True
+    )
     profit_base_raw: Mapped[int | None] = mapped_column(Numeric(78, 0), nullable=True)
     profit_base: Mapped[float | None] = mapped_column(Numeric(38, 18), nullable=True)
     harm_base_raw: Mapped[int | None] = mapped_column(Numeric(78, 0), nullable=True)
     harm_base: Mapped[float | None] = mapped_column(Numeric(38, 18), nullable=True)
 
     # ガス（攻撃者負担/全体）
-    gas_fee_wei_attacker: Mapped[int | None] = mapped_column(Numeric(78, 0), nullable=True)
-    gas_fee_eth_attacker: Mapped[float | None] = mapped_column(Numeric(38, 18), nullable=True)
-    gas_fee_usd_attacker: Mapped[float | None] = mapped_column(Numeric(38, 18), nullable=True)
-    gas_fee_eth_total: Mapped[float | None] = mapped_column(Numeric(38, 18), nullable=True)
-    gas_fee_usd_total: Mapped[float | None] = mapped_column(Numeric(38, 18), nullable=True)
+    gas_fee_wei_attacker: Mapped[int | None] = mapped_column(
+        Numeric(78, 0), nullable=True
+    )
+    gas_fee_eth_attacker: Mapped[float | None] = mapped_column(
+        Numeric(38, 18), nullable=True
+    )
+    gas_fee_usd_attacker: Mapped[float | None] = mapped_column(
+        Numeric(38, 18), nullable=True
+    )
+    gas_fee_eth_total: Mapped[float | None] = mapped_column(
+        Numeric(38, 18), nullable=True
+    )
+    gas_fee_usd_total: Mapped[float | None] = mapped_column(
+        Numeric(38, 18), nullable=True
+    )
 
-    detected_by: Mapped[str | None] = mapped_column(String, nullable=True)  # 検出器名/バージョン
+    detected_by: Mapped[str | None] = mapped_column(
+        String, nullable=True
+    )  # 検出器名/バージョン
     notes: Mapped[str | None] = mapped_column(String, nullable=True)
 
     __table_args__ = (
         UniqueConstraint(
-            "front_attack_swap_id", "victim_swap_id", "back_attack_swap_id",
+            "front_attack_swap_id",
+            "victim_swap_id",
+            "back_attack_swap_id",
             name="uq_sandwich_triplet",
         ),
         Index("idx_sandwich_chain", "chain_id"),

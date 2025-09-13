@@ -5,7 +5,7 @@ from app.lib.utils.convert_id import decode_id
 from app.dependencies.repositories.defi_pool_repository import (
     get_defi_pool_repository,
 )
-from app.models.defi_pool import DefiPool
+
 
 async def get_defi_pool_by_id(
     defi_pool_id: str,

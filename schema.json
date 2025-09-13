@@ -183,6 +183,12 @@
       "default": "None"
     },
     {
+      "name": "decimals_invalid",
+      "type": "BOOLEAN",
+      "nullable": false,
+      "default": "None"
+    },
+    {
       "name": "created_at",
       "type": "TIMESTAMP",
       "nullable": false,
@@ -304,6 +310,360 @@
       "name": "fee_tier_bps",
       "type": "INTEGER",
       "nullable": false,
+      "default": "None"
+    },
+    {
+      "name": "created_at",
+      "type": "TIMESTAMP",
+      "nullable": false,
+      "default": "now()"
+    },
+    {
+      "name": "updated_at",
+      "type": "TIMESTAMP",
+      "nullable": false,
+      "default": "now()"
+    }
+  ],
+  "transactions": [
+    {
+      "name": "id",
+      "type": "INTEGER",
+      "nullable": false,
+      "default": "nextval('transactions_id_seq'::regclass)"
+    },
+    {
+      "name": "chain_id",
+      "type": "INTEGER",
+      "nullable": false,
+      "default": "None"
+    },
+    {
+      "name": "block_number",
+      "type": "BIGINT",
+      "nullable": false,
+      "default": "None"
+    },
+    {
+      "name": "block_timestamp",
+      "type": "VARCHAR",
+      "nullable": false,
+      "default": "None"
+    },
+    {
+      "name": "tx_index",
+      "type": "INTEGER",
+      "nullable": false,
+      "default": "None"
+    },
+    {
+      "name": "tx_hash",
+      "type": "VARCHAR",
+      "nullable": false,
+      "default": "None"
+    },
+    {
+      "name": "from_address",
+      "type": "VARCHAR",
+      "nullable": false,
+      "default": "None"
+    },
+    {
+      "name": "to_address",
+      "type": "VARCHAR",
+      "nullable": true,
+      "default": "None"
+    },
+    {
+      "name": "value_wei",
+      "type": "NUMERIC(78, 0)",
+      "nullable": false,
+      "default": "None"
+    },
+    {
+      "name": "gas_used",
+      "type": "BIGINT",
+      "nullable": true,
+      "default": "None"
+    },
+    {
+      "name": "gas_price_wei",
+      "type": "NUMERIC(78, 0)",
+      "nullable": true,
+      "default": "None"
+    },
+    {
+      "name": "effective_gas_price_wei",
+      "type": "NUMERIC(78, 0)",
+      "nullable": true,
+      "default": "None"
+    },
+    {
+      "name": "status",
+      "type": "SMALLINT",
+      "nullable": true,
+      "default": "None"
+    },
+    {
+      "name": "created_at",
+      "type": "TIMESTAMP",
+      "nullable": false,
+      "default": "now()"
+    },
+    {
+      "name": "updated_at",
+      "type": "TIMESTAMP",
+      "nullable": false,
+      "default": "now()"
+    }
+  ],
+  "swaps": [
+    {
+      "name": "id",
+      "type": "INTEGER",
+      "nullable": false,
+      "default": "nextval('swaps_id_seq'::regclass)"
+    },
+    {
+      "name": "chain_id",
+      "type": "INTEGER",
+      "nullable": false,
+      "default": "None"
+    },
+    {
+      "name": "defi_pool_id",
+      "type": "INTEGER",
+      "nullable": false,
+      "default": "None"
+    },
+    {
+      "name": "transaction_id",
+      "type": "INTEGER",
+      "nullable": false,
+      "default": "None"
+    },
+    {
+      "name": "log_index",
+      "type": "INTEGER",
+      "nullable": false,
+      "default": "None"
+    },
+    {
+      "name": "sender",
+      "type": "VARCHAR",
+      "nullable": true,
+      "default": "None"
+    },
+    {
+      "name": "recipient",
+      "type": "VARCHAR",
+      "nullable": true,
+      "default": "None"
+    },
+    {
+      "name": "amount0_in_raw",
+      "type": "NUMERIC(78, 0)",
+      "nullable": false,
+      "default": "None"
+    },
+    {
+      "name": "amount1_in_raw",
+      "type": "NUMERIC(78, 0)",
+      "nullable": false,
+      "default": "None"
+    },
+    {
+      "name": "amount0_out_raw",
+      "type": "NUMERIC(78, 0)",
+      "nullable": false,
+      "default": "None"
+    },
+    {
+      "name": "amount1_out_raw",
+      "type": "NUMERIC(78, 0)",
+      "nullable": false,
+      "default": "None"
+    },
+    {
+      "name": "sqrt_price_x96",
+      "type": "NUMERIC(78, 0)",
+      "nullable": true,
+      "default": "None"
+    },
+    {
+      "name": "liquidity_raw",
+      "type": "NUMERIC(78, 0)",
+      "nullable": true,
+      "default": "None"
+    },
+    {
+      "name": "tick",
+      "type": "INTEGER",
+      "nullable": true,
+      "default": "None"
+    },
+    {
+      "name": "base_token_id",
+      "type": "INTEGER",
+      "nullable": true,
+      "default": "None"
+    },
+    {
+      "name": "base_is_token0",
+      "type": "BOOLEAN",
+      "nullable": true,
+      "default": "None"
+    },
+    {
+      "name": "direction",
+      "type": "SMALLINT",
+      "nullable": true,
+      "default": "None"
+    },
+    {
+      "name": "block_number",
+      "type": "BIGINT",
+      "nullable": false,
+      "default": "None"
+    },
+    {
+      "name": "tx_hash",
+      "type": "VARCHAR",
+      "nullable": false,
+      "default": "None"
+    },
+    {
+      "name": "created_at",
+      "type": "TIMESTAMP",
+      "nullable": false,
+      "default": "now()"
+    },
+    {
+      "name": "updated_at",
+      "type": "TIMESTAMP",
+      "nullable": false,
+      "default": "now()"
+    }
+  ],
+  "sandwich_attacks": [
+    {
+      "name": "id",
+      "type": "INTEGER",
+      "nullable": false,
+      "default": "nextval('sandwich_attacks_id_seq'::regclass)"
+    },
+    {
+      "name": "chain_id",
+      "type": "INTEGER",
+      "nullable": false,
+      "default": "None"
+    },
+    {
+      "name": "front_attack_swap_id",
+      "type": "INTEGER",
+      "nullable": false,
+      "default": "None"
+    },
+    {
+      "name": "victim_swap_id",
+      "type": "INTEGER",
+      "nullable": false,
+      "default": "None"
+    },
+    {
+      "name": "back_attack_swap_id",
+      "type": "INTEGER",
+      "nullable": false,
+      "default": "None"
+    },
+    {
+      "name": "attacker_address",
+      "type": "VARCHAR",
+      "nullable": false,
+      "default": "None"
+    },
+    {
+      "name": "victim_address",
+      "type": "VARCHAR",
+      "nullable": true,
+      "default": "None"
+    },
+    {
+      "name": "base_token_id",
+      "type": "INTEGER",
+      "nullable": true,
+      "default": "None"
+    },
+    {
+      "name": "victim_base_size_raw",
+      "type": "NUMERIC(78, 0)",
+      "nullable": true,
+      "default": "None"
+    },
+    {
+      "name": "profit_base_raw",
+      "type": "NUMERIC(78, 0)",
+      "nullable": true,
+      "default": "None"
+    },
+    {
+      "name": "profit_base",
+      "type": "NUMERIC(38, 18)",
+      "nullable": true,
+      "default": "None"
+    },
+    {
+      "name": "harm_base_raw",
+      "type": "NUMERIC(78, 0)",
+      "nullable": true,
+      "default": "None"
+    },
+    {
+      "name": "harm_base",
+      "type": "NUMERIC(38, 18)",
+      "nullable": true,
+      "default": "None"
+    },
+    {
+      "name": "gas_fee_wei_attacker",
+      "type": "NUMERIC(78, 0)",
+      "nullable": true,
+      "default": "None"
+    },
+    {
+      "name": "gas_fee_eth_attacker",
+      "type": "NUMERIC(38, 18)",
+      "nullable": true,
+      "default": "None"
+    },
+    {
+      "name": "gas_fee_usd_attacker",
+      "type": "NUMERIC(38, 18)",
+      "nullable": true,
+      "default": "None"
+    },
+    {
+      "name": "gas_fee_eth_total",
+      "type": "NUMERIC(38, 18)",
+      "nullable": true,
+      "default": "None"
+    },
+    {
+      "name": "gas_fee_usd_total",
+      "type": "NUMERIC(38, 18)",
+      "nullable": true,
+      "default": "None"
+    },
+    {
+      "name": "detected_by",
+      "type": "VARCHAR",
+      "nullable": true,
+      "default": "None"
+    },
+    {
+      "name": "notes",
+      "type": "VARCHAR",
+      "nullable": true,
       "default": "None"
     },
     {

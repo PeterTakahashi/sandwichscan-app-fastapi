@@ -3,7 +3,7 @@ from pydantic import Field, ConfigDict
 from app.v1.schemas.common.id_encoder import HasEncodedID
 from app.v1.schemas.chain.read import ChainRead
 from app.v1.schemas.defi_pool.token.read import TokenRead
-from app.v1.schemas.defi_pool.defi_factory.read import DefiFactoryRead
+
 
 class DefiPoolRead(HasEncodedID):
     address: str = Field(..., description="The contract address of the DeFi protocol.")

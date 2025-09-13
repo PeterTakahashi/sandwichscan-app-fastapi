@@ -3,7 +3,8 @@ from app.db.base import Base
 from sqlalchemy import String, UniqueConstraint, BigInteger
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from app.models.mixin.timestamp import TimestampMixin
-from sqlalchemy import ForeignKey
+from sqlalchemy import ForeignKey, DateTime
+from datetime import datetime
 
 if TYPE_CHECKING:
     from app.models.defi_factory import DefiFactory
@@ -43,6 +44,12 @@ class DefiPool(TimestampMixin, Base):
     created_tx_hash: Mapped[str] = mapped_column(String, nullable=False)
     tick_spacing: Mapped[int] = mapped_column(nullable=False, default=0)
     fee_tier_bps: Mapped[int] = mapped_column(nullable=False, default=0)
+    is_active: Mapped[bool] = mapped_column(nullable=False, default=False)
+    last_swap_block: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
+    last_swap_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    swaps_24h: Mapped[int] = mapped_column(nullable=False, default=0)
+    swaps_7d: Mapped[int] = mapped_column(nullable=False, default=0)
+    activity_score: Mapped[int] = mapped_column(nullable=False, default=0)
 
     __table_args__ = (
         UniqueConstraint("chain_id", "address", name="uq_defi_pools_chain_address"),

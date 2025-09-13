@@ -28,16 +28,26 @@ class Swap(TimestampMixin, Base):
         index=True,
     )
 
-    log_index: Mapped[int] = mapped_column(Integer, nullable=False)  # (tx_hash, log_index)で一意
+    log_index: Mapped[int] = mapped_column(
+        Integer, nullable=False
+    )  # (tx_hash, log_index)で一意
 
     # 共通（v2/v3/v4を包括）
     sender: Mapped[str | None] = mapped_column(String, nullable=True)
     recipient: Mapped[str | None] = mapped_column(String, nullable=True)
 
-    amount0_in_raw: Mapped[int] = mapped_column(Numeric(78, 0), nullable=False, default=0)
-    amount1_in_raw: Mapped[int] = mapped_column(Numeric(78, 0), nullable=False, default=0)
-    amount0_out_raw: Mapped[int] = mapped_column(Numeric(78, 0), nullable=False, default=0)
-    amount1_out_raw: Mapped[int] = mapped_column(Numeric(78, 0), nullable=False, default=0)
+    amount0_in_raw: Mapped[int] = mapped_column(
+        Numeric(78, 0), nullable=False, default=0
+    )
+    amount1_in_raw: Mapped[int] = mapped_column(
+        Numeric(78, 0), nullable=False, default=0
+    )
+    amount0_out_raw: Mapped[int] = mapped_column(
+        Numeric(78, 0), nullable=False, default=0
+    )
+    amount1_out_raw: Mapped[int] = mapped_column(
+        Numeric(78, 0), nullable=False, default=0
+    )
 
     # v3系専用（存在しない場合はNULL）
     sqrt_price_x96: Mapped[int | None] = mapped_column(Numeric(78, 0), nullable=True)
