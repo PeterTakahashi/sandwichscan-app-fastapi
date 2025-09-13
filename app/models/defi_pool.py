@@ -7,6 +7,8 @@ from sqlalchemy import ForeignKey
 
 if TYPE_CHECKING:
     from app.models.defi_factory import DefiFactory
+    from app.models.chain import Chain
+    from app.models.token import Token
 
 
 class DefiPool(TimestampMixin, Base):
@@ -48,4 +50,11 @@ class DefiPool(TimestampMixin, Base):
 
     defi_factory: Mapped["DefiFactory"] = relationship(
         "DefiFactory", back_populates="defi_pools"
+    )
+    chain: Mapped["Chain"] = relationship("Chain", back_populates="defi_pools")
+    token0: Mapped["Token"] = relationship(
+        "Token", foreign_keys=[token0_id], back_populates="defi_pools_token0"
+    )
+    token1: Mapped["Token"] = relationship(
+        "Token", foreign_keys=[token1_id], back_populates="defi_pools_token1"
     )

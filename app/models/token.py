@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 from app.db.base import Base
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.models.mixin.timestamp import TimestampMixin
@@ -14,6 +14,7 @@ from app.models.enums.token import TokenType
 
 if TYPE_CHECKING:
     from app.models.chain import Chain
+    from app.models.defi_pool import DefiPool
 
 
 class Token(TimestampMixin, Base):
@@ -45,3 +46,9 @@ class Token(TimestampMixin, Base):
         UniqueConstraint("chain_id", "address", name="uq_tokens_chain_address"),
     )
     chain: Mapped["Chain"] = relationship("Chain", back_populates="tokens")
+    defi_pools_token0: Mapped[List["DefiPool"]] = relationship(
+        "DefiPool", foreign_keys="[DefiPool.token0_id]", back_populates="token0"
+    )
+    defi_pools_token1: Mapped[List["DefiPool"]] = relationship(
+        "DefiPool", foreign_keys="[DefiPool.token1_id]", back_populates="token1"
+    )

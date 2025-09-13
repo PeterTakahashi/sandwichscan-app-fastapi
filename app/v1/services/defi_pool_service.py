@@ -6,7 +6,7 @@ from app.v1.schemas.defi_pool import (
 from app.repositories.defi_pool_repository import DefiPoolRepository
 
 from app.v1.schemas.common.list.base_list_response import ListResponseMeta
-
+from app.models.defi_pool import DefiPool
 
 class DefiPoolService:
     def __init__(
@@ -21,6 +21,7 @@ class DefiPoolService:
         """
         defi_pools = await self.defi_pool_repository.where(
             **search_params.model_dump(exclude_none=True),
+            joinedload_models=[DefiPool.chain, DefiPool.token0, DefiPool.token1],
         )
         total_count = await self.defi_pool_repository.count(
             **search_params.model_dump(

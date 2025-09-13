@@ -7,6 +7,7 @@ from typing import List
 
 if TYPE_CHECKING:
     from app.models.defi_factory import DefiFactory
+    from app.models.defi_pool import DefiPool
     from app.models.token import Token
     from app.models.transaction import Transaction
 
@@ -41,6 +42,9 @@ class Chain(TimestampMixin, Base):
 
     defi_factories: Mapped[List["DefiFactory"]] = relationship(
         "DefiFactory", back_populates="chain", cascade="all, delete-orphan"
+    )
+    defi_pools: Mapped[List["DefiPool"]] = relationship(
+        "DefiPool", back_populates="chain", cascade="all, delete-orphan"
     )
     tokens: Mapped[List["Token"]] = relationship(
         "Token", back_populates="chain", cascade="all, delete-orphan"
