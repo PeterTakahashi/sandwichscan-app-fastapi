@@ -1,5 +1,5 @@
 from app.db.base import Base
-from sqlalchemy import String, Integer, SmallInteger, Numeric
+from sqlalchemy import String, Integer, Numeric
 from sqlalchemy.orm import Mapped, mapped_column
 from app.models.mixin.timestamp import TimestampMixin
 from sqlalchemy import ForeignKey, UniqueConstraint, Index
@@ -56,24 +56,20 @@ class Swap(TimestampMixin, Base):
     liquidity_raw: Mapped[int | None] = mapped_column(Numeric(78, 0), nullable=True)
     tick: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
-    # 解析補助（UI/検出アルゴ用）
-    base_token_id: Mapped[int | None] = mapped_column(
-        ForeignKey("tokens.id", ondelete="SET NULL"),
-        nullable=True,
-        index=True,
+    sell_token_id: Mapped[int | None] = mapped_column(
+        ForeignKey("tokens.id", ondelete="SET NULL"), nullable=True, index=True
+    )
+    buy_token_id: Mapped[int | None] = mapped_column(
+        ForeignKey("tokens.id", ondelete="SET NULL"), nullable=True, index=True
     )
     transaction_id: Mapped[int] = mapped_column(
         ForeignKey("transactions.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
     )
-    direction: Mapped[int | None] = mapped_column(
-        SmallInteger, nullable=True
-    )  # 1=base買い, -1=base売り, 0/NULL=不明
 
     __table_args__ = (
         UniqueConstraint("transaction_id", "log_index", name="uq_swaps_tx_log_index"),
         Index("idx_swaps_sender", "chain_id", "sender"),
         Index("idx_swaps_recipient", "chain_id", "recipient"),
-        Index("idx_swaps_base_direction", "base_token_id", "direction"),
     )
