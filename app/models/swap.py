@@ -1,8 +1,12 @@
 from app.db.base import Base
-from sqlalchemy import String, Integer, BigInteger, SmallInteger, Numeric
+from sqlalchemy import String, Integer, SmallInteger, Numeric
 from sqlalchemy.orm import Mapped, mapped_column
 from app.models.mixin.timestamp import TimestampMixin
 from sqlalchemy import ForeignKey, UniqueConstraint, Index
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    pass
 
 
 class Swap(TimestampMixin, Base):
@@ -28,9 +32,7 @@ class Swap(TimestampMixin, Base):
         index=True,
     )
 
-    log_index: Mapped[int] = mapped_column(
-        Integer, nullable=False
-    )  # (tx_hash, log_index)で一意
+    log_index: Mapped[int] = mapped_column(Integer, nullable=False)
 
     # 共通（v2/v3/v4を包括）
     sender: Mapped[str | None] = mapped_column(String, nullable=True)
@@ -60,18 +62,17 @@ class Swap(TimestampMixin, Base):
         nullable=True,
         index=True,
     )
+    transaction_id: Mapped[int] = mapped_column(
+        ForeignKey("transactions.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
     direction: Mapped[int | None] = mapped_column(
         SmallInteger, nullable=True
     )  # 1=base買い, -1=base売り, 0/NULL=不明
 
-    # 冗長（JOIN削減）
-    block_number: Mapped[int] = mapped_column(BigInteger, nullable=False)
-    tx_hash: Mapped[str] = mapped_column(String, nullable=False)
-
     __table_args__ = (
-        UniqueConstraint("tx_hash", "log_index", name="uq_swaps_txhash_logindex"),
-        Index("idx_swaps_pool_block", "defi_pool_id", "block_number"),
-        Index("idx_swaps_chain_block", "chain_id", "block_number"),
+        UniqueConstraint("transaction_id", "log_index", name="uq_swaps_tx_log_index"),
         Index("idx_swaps_sender", "chain_id", "sender"),
         Index("idx_swaps_recipient", "chain_id", "recipient"),
         Index("idx_swaps_base_direction", "base_token_id", "direction"),
