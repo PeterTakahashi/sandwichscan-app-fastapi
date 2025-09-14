@@ -65,6 +65,11 @@ class SandwichAttack(TimestampMixin, Base):
         Numeric(38, 18), nullable=True
     )
 
+    revenue_usd: Mapped[float | None] = mapped_column(Numeric(38, 18), nullable=True)
+    cost_usd: Mapped[float | None] = mapped_column(Numeric(38, 18), nullable=True)
+    profit_usd: Mapped[float | None] = mapped_column(Numeric(38, 18), nullable=True)
+    harm_usd: Mapped[float | None] = mapped_column(Numeric(38, 18), nullable=True)
+
     detected_by: Mapped[str | None] = mapped_column(
         String, nullable=True
     )  # 検出器名/バージョン

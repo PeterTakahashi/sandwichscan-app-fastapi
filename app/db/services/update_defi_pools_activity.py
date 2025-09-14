@@ -10,7 +10,6 @@ from app.lib.utils.bq_client import bq_client
 from app.models import Chain, DefiPool
 from sqlalchemy.orm import aliased
 from app.models import Token
-import time
 
 # ──────────────────────────────────────────────────────────────
 # Tunables
@@ -71,10 +70,13 @@ USING
   topic_swap_v3 AS topic_swap_v3;
 """
 
+
 # ──────────────────────────────────────────────────────────────
 # Utility: リトライ
 # ──────────────────────────────────────────────────────────────
-async def retry_async(fn, *, attempts=RETRY_ATTEMPTS, base_delay=RETRY_BASE_DELAY, label="op"):
+async def retry_async(
+    fn, *, attempts=RETRY_ATTEMPTS, base_delay=RETRY_BASE_DELAY, label="op"
+):
     last: Optional[BaseException] = None
     for i in range(attempts):
         try:
@@ -82,43 +84,62 @@ async def retry_async(fn, *, attempts=RETRY_ATTEMPTS, base_delay=RETRY_BASE_DELA
         except Exception as e:
             last = e
             delay = base_delay * (2**i)
-            print(f"[retry] {label} failed: {e} -> retry in {delay:.2f}s ({i+1}/{attempts})")
+            print(
+                f"[retry] {label} failed: {e} -> retry in {delay:.2f}s ({i+1}/{attempts})"
+            )
             await asyncio.sleep(delay)
     if last:
         raise last
 
+
 # ──────────────────────────────────────────────────────────────
 # Activity score
 # ──────────────────────────────────────────────────────────────
-def _activity_score(swaps_24h: int, swaps_7d: int, last_swap_at: Optional[datetime]) -> int:
+def _activity_score(
+    swaps_24h: int, swaps_7d: int, last_swap_at: Optional[datetime]
+) -> int:
     score = 3 * int(swaps_24h) + int(swaps_7d)
     if last_swap_at:
         age_s = max(0.0, (datetime.utcnow() - last_swap_at).total_seconds())
-        if age_s <= 24*3600:
+        if age_s <= 24 * 3600:
             score += 25
-        elif age_s <= 72*3600:
+        elif age_s <= 72 * 3600:
             score += 10
     return score
+
 
 # ──────────────────────────────────────────────────────────────
 # BQ 実行（バッチ 1 回）
 # ──────────────────────────────────────────────────────────────
-async def _bq_fetch_activity(dataset: str, pool_addrs_lower: List[str]) -> Dict[str, Tuple[int, int, Optional[int], Optional[str]]]:
+async def _bq_fetch_activity(
+    dataset: str, pool_addrs_lower: List[str]
+) -> Dict[str, Tuple[int, int, Optional[int], Optional[str]]]:
     if not pool_addrs_lower:
         return {}
-    from google.cloud.bigquery import QueryJobConfig, ScalarQueryParameter, ArrayQueryParameter
+    from google.cloud.bigquery import (
+        QueryJobConfig,
+        ScalarQueryParameter,
+        ArrayQueryParameter,
+    )
+
     client = bq_client()
     now_utc = datetime.utcnow()
     job_config = QueryJobConfig(
         query_parameters=[
             ScalarQueryParameter("dataset", "STRING", dataset),
             ArrayQueryParameter("pools", "STRING", pool_addrs_lower),
-            ScalarQueryParameter("ts_24h_start", "TIMESTAMP", now_utc - timedelta(days=1)),
-            ScalarQueryParameter("ts_7d_start",  "TIMESTAMP", now_utc - timedelta(days=7)),
+            ScalarQueryParameter(
+                "ts_24h_start", "TIMESTAMP", now_utc - timedelta(days=1)
+            ),
+            ScalarQueryParameter(
+                "ts_7d_start", "TIMESTAMP", now_utc - timedelta(days=7)
+            ),
         ]
     )
+
     def _q():
         return client.query(_BQ_SQL, job_config=job_config)
+
     job = await retry_async(lambda: asyncio.to_thread(_q), label="bq.activity")
     out: Dict[str, Tuple[int, int, Optional[int], Optional[str]]] = {}
     for r in job:
@@ -129,6 +150,7 @@ async def _bq_fetch_activity(dataset: str, pool_addrs_lower: List[str]) -> Dict[
             str(r["last_swap_at"]) if r.get("last_swap_at") is not None else None,
         )
     return out
+
 
 # ──────────────────────────────────────────────────────────────
 # DB: id > last_id でページング
@@ -157,6 +179,7 @@ async def _iter_pools(session: AsyncSession, chain_id_db: int, page_size: int):
         yield rows
         last_id = rows[-1][0]
 
+
 # ──────────────────────────────────────────────────────────────
 # DB: bulk UPDATE（synchronize_session=False を明示）
 # ──────────────────────────────────────────────────────────────
@@ -174,8 +197,11 @@ async def _bulk_update_pools(session: AsyncSession, updates: List[Dict]):
             swaps_7d=bindparam("swaps_7d"),
             activity_score=bindparam("activity_score"),
         )
-    ).execution_options(synchronize_session=False)  # ★ 重要
+    ).execution_options(
+        synchronize_session=False
+    )  # ★ 重要
     await session.execute(stmt, updates)
+
 
 # ──────────────────────────────────────────────────────────────
 # チェーン 1 本分
@@ -232,7 +258,9 @@ async def _process_chain(chain_id_db: int, chain_name: str, dataset: str):
                             except Exception:
                                 last_dt = None
                         score = _activity_score(swaps_24h, swaps_7d, last_dt)
-                        print(f"[{chain_name}] pool_id={pid} swaps_24h={swaps_24h} swaps_7d={swaps_7d} last_swap_at={last_dt} score={score}")
+                        print(
+                            f"[{chain_name}] pool_id={pid} swaps_24h={swaps_24h} swaps_7d={swaps_7d} last_swap_at={last_dt} score={score}"
+                        )
                         page_updates.append(
                             dict(
                                 b_id=pid,
@@ -251,7 +279,9 @@ async def _process_chain(chain_id_db: int, chain_name: str, dataset: str):
                     await _bulk_update_pools(session, page_updates)
                     await session.commit()
                     total_updated += len(page_updates)
-                    print(f"[{chain_name}] updated {total_updated} pools so far (page {pages})")
+                    print(
+                        f"[{chain_name}] updated {total_updated} pools so far (page {pages})"
+                    )
                     page_updates.clear()
 
             # ページ残りを flush
@@ -259,9 +289,12 @@ async def _process_chain(chain_id_db: int, chain_name: str, dataset: str):
                 await _bulk_update_pools(session, page_updates)
                 await session.commit()
                 total_updated += len(page_updates)
-                print(f"[{chain_name}] updated {total_updated} pools so far (page {pages})")
+                print(
+                    f"[{chain_name}] updated {total_updated} pools so far (page {pages})"
+                )
 
     print(f"[{chain_name}] done. total_updated={total_updated}, pages={pages}")
+
 
 # ──────────────────────────────────────────────────────────────
 # Public API
@@ -278,17 +311,47 @@ async def update_defi_pools_activity(*, only_chain: Optional[str] = None):
     for chain_id_db, chain_name, dataset in chains:
         await _process_chain(chain_id_db, chain_name, dataset)
 
+
 # ──────────────────────────────────────────────────────────────
 # CLI
 # ──────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     import argparse
-    p = argparse.ArgumentParser(description="Update DefiPool activity metrics from BigQuery (batched)")
-    p.add_argument("--chain", dest="only_chain", type=str, default=None, help="Chain.name filter")
-    p.add_argument("--db-page", dest="db_page", type=int, default=DB_POOL_PAGE_SIZE, help="DB page size")
-    p.add_argument("--bq-batch", dest="bq_batch", type=int, default=BQ_POOL_BATCH_SIZE, help="BQ pools batch size")
-    p.add_argument("--update-batch", dest="update_batch", type=int, default=DB_UPDATE_BATCH_SIZE, help="DB update batch size")
-    p.add_argument("--concurrency", dest="concurrency", type=int, default=CONCURRENCY_PER_CHAIN, help="BQ concurrency per chain")
+
+    p = argparse.ArgumentParser(
+        description="Update DefiPool activity metrics from BigQuery (batched)"
+    )
+    p.add_argument(
+        "--chain", dest="only_chain", type=str, default=None, help="Chain.name filter"
+    )
+    p.add_argument(
+        "--db-page",
+        dest="db_page",
+        type=int,
+        default=DB_POOL_PAGE_SIZE,
+        help="DB page size",
+    )
+    p.add_argument(
+        "--bq-batch",
+        dest="bq_batch",
+        type=int,
+        default=BQ_POOL_BATCH_SIZE,
+        help="BQ pools batch size",
+    )
+    p.add_argument(
+        "--update-batch",
+        dest="update_batch",
+        type=int,
+        default=DB_UPDATE_BATCH_SIZE,
+        help="DB update batch size",
+    )
+    p.add_argument(
+        "--concurrency",
+        dest="concurrency",
+        type=int,
+        default=CONCURRENCY_PER_CHAIN,
+        help="BQ concurrency per chain",
+    )
     args = p.parse_args()
 
     asyncio.run(update_defi_pools_activity(only_chain=args.only_chain))

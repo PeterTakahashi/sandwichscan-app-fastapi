@@ -14,7 +14,7 @@ from sqlalchemy.dialects.postgresql import insert as pg_insert
 
 from app.db.session import async_session_maker
 from app.lib.utils.bq_client import bq_client
-from app.models import Chain, DefiFactory, Transaction, DefiVersion, DefiPool
+from app.models import Chain, Transaction, DefiPool
 
 # ---------------------------------------
 # Tunables
@@ -185,9 +185,6 @@ async def bq_fetch_tx_rows_for_pools(
     if not pools_lower:
         return []
     client = bq_client()
-    logs_table = f"{dataset}.logs"        # 使っていないが参照残し可
-    tx_table   = f"{dataset}.transactions"
-    rcpt_table = f"{dataset}.receipts"
 
     job_config = QueryJobConfig(
         query_parameters=[
@@ -215,13 +212,25 @@ async def bq_fetch_tx_rows_for_pools(
                 to_address=r.get("to_address"),
                 value_wei=int(r["value_wei"]) if r.get("value_wei") is not None else 0,
                 gas_used=int(r["gas_used"]) if r.get("gas_used") is not None else None,
-                gas_price_wei=int(r["gas_price_wei"]) if r.get("gas_price_wei") is not None else None,
-                effective_gas_price_wei=int(r["effective_gas_price_wei"]) if r.get("effective_gas_price_wei") is not None else None,
+                gas_price_wei=(
+                    int(r["gas_price_wei"])
+                    if r.get("gas_price_wei") is not None
+                    else None
+                ),
+                effective_gas_price_wei=(
+                    int(r["effective_gas_price_wei"])
+                    if r.get("effective_gas_price_wei") is not None
+                    else None
+                ),
                 status=int(r["status"]) if r.get("status") is not None else None,
             )
         )
-    print(f"[BQ] (active pools) fetched rows={len(rows)} for {from_block}-{to_block} in {time.time()-t0:.2f}s")
+    print(
+        f"[BQ] (active pools) fetched rows={len(rows)} for {from_block}-{to_block} in {time.time()-t0:.2f}s"
+    )
     return rows
+
+
 # ---------------------------------------
 # UPSERT to transactions
 # ---------------------------------------
@@ -313,15 +322,12 @@ async def backfill_transactions_uniswap(
                 continue
 
             # ★ is_activeなプールを取得（address, created_block_number）
-            pq = (
-                select(
-                    func.lower(DefiPool.address),
-                    DefiPool.created_block_number,
-                )
-                .where(
-                    DefiPool.chain_id == chain_id_db,
-                    DefiPool.is_active.is_(True),
-                )
+            pq = select(
+                func.lower(DefiPool.address),
+                DefiPool.created_block_number,
+            ).where(
+                DefiPool.chain_id == chain_id_db,
+                DefiPool.is_active.is_(True),
             )
             pool_rows = (await session.execute(pq)).all()
             if not pool_rows:
@@ -329,10 +335,16 @@ async def backfill_transactions_uniswap(
                 continue
 
             pools_lower = [addr for (addr, _cb) in pool_rows]
-            start_blk = min(int(cb) for (_a, cb) in pool_rows if cb is not None) if any(cb for (_a, cb) in pool_rows) else 0
+            start_blk = (
+                min(int(cb) for (_a, cb) in pool_rows if cb is not None)
+                if any(cb for (_a, cb) in pool_rows)
+                else 0
+            )
             end_blk = int(chain_last)
 
-            print(f"[{chain_name}] active_pools={len(pools_lower)} scan {start_blk}-{end_blk} step={window_blocks}")
+            print(
+                f"[{chain_name}] active_pools={len(pools_lower)} scan {start_blk}-{end_blk} step={window_blocks}"
+            )
 
             # ウィンドウ×プールバッチで実行
             win_from = start_blk
@@ -353,9 +365,13 @@ async def backfill_transactions_uniswap(
                             n = await upsert_transactions(session, chain_id_db, tx_rows)
                             total_upserted += n
                     except Exception as e:
-                        print(f"[{chain_name}] window {win_from}-{win_to} pools_batch({len(batch)}) ERROR: {e} (skip batch)")
+                        print(
+                            f"[{chain_name}] window {win_from}-{win_to} pools_batch({len(batch)}) ERROR: {e} (skip batch)"
+                        )
 
-                print(f"[{chain_name}] window {win_from}-{win_to} upserted_total={total_upserted}")
+                print(
+                    f"[{chain_name}] window {win_from}-{win_to} upserted_total={total_upserted}"
+                )
                 win_from = win_to + 1
 
     print(f"[DONE] total_elapsed={time.time()-t_all:.2f}s")
