@@ -24,6 +24,7 @@ from app.models.token import Token
 from app.models.transaction import Transaction
 from app.models.swap import Swap
 from app.models.sandwich_attack import SandwichAttack
+from app.models.usd_stable_coin import UsdStableCoin
 
 load_dotenv()
 

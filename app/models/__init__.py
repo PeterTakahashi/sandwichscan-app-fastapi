@@ -7,6 +7,7 @@ from .token import Token
 from .transaction import Transaction
 from .swap import Swap
 from .sandwich_attack import SandwichAttack
+from .usd_stable_coin import UsdStableCoin
 
 __all__ = [
     "Chain",
@@ -18,4 +19,5 @@ __all__ = [
     "Transaction",
     "Swap",
     "SandwichAttack",
+    "UsdStableCoin",
 ]
