@@ -10,6 +10,7 @@ if TYPE_CHECKING:
     from app.models.defi_pool import DefiPool
     from app.models.token import Token
     from app.models.transaction import Transaction
+    from app.models.usd_stable_coin import UsdStableCoin
 
 
 class Chain(TimestampMixin, Base):
@@ -31,10 +32,6 @@ class Chain(TimestampMixin, Base):
 
     rpc_url: Mapped[str] = mapped_column(String, nullable=False, default="")
 
-    usd_stable_coin_address: Mapped[str] = mapped_column(
-        String, nullable=False, default=""
-    )
-
     last_block_number: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     big_query_table_id: Mapped[str] = mapped_column(String, nullable=False, default="")
 
@@ -51,4 +48,14 @@ class Chain(TimestampMixin, Base):
     )
     transactions: Mapped[List["Transaction"]] = relationship(
         "Transaction", back_populates="chain", cascade="all, delete-orphan"
+    )
+    usd_stable_coins: Mapped[List["UsdStableCoin"]] = relationship(
+        "UsdStableCoin", back_populates="chain", cascade="all, delete-orphan"
+    )
+    usd_stable_coin_tokens: Mapped[List["Token"]] = relationship(
+        "Token",
+        secondary="usd_stable_coins",
+        primaryjoin="Chain.id==UsdStableCoin.chain_id",
+        secondaryjoin="Token.id==UsdStableCoin.token_id",
+        viewonly=True,
     )

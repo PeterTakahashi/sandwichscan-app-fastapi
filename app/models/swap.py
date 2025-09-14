@@ -60,7 +60,6 @@ class Swap(TimestampMixin, Base):
         nullable=True,
         index=True,
     )
-    base_is_token0: Mapped[bool | None] = mapped_column(nullable=True)
     direction: Mapped[int | None] = mapped_column(
         SmallInteger, nullable=True
     )  # 1=base買い, -1=base売り, 0/NULL=不明
