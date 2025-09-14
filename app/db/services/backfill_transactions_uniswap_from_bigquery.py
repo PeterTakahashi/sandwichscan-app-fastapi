@@ -14,7 +14,7 @@ from sqlalchemy.dialects.postgresql import insert as pg_insert
 
 from app.db.session import async_session_maker
 from app.lib.utils.bq_client import bq_client
-from app.models import Chain, DefiFactory, Transaction, DefiVersion
+from app.models import Chain, DefiFactory, Transaction, DefiVersion, DefiPool
 
 # ---------------------------------------
 # Tunables
@@ -23,6 +23,7 @@ WINDOW_BLOCKS = 100_000  # 1回のスキャン窓
 TX_UPSERT_BATCH = 2_500  # DB UPSERT バッチ
 BQ_RETRY_ATTEMPTS = 5
 BQ_RETRY_BASE_DELAY = 0.5
+POOLS_BATCH = 5_000
 
 # ---------------------------------------
 # Helpers
@@ -89,125 +90,119 @@ class TxRow:
 # ---------------------------------------
 # BigQuery SQL（Uniswap限定：Factory→Pool→Swap→Tx+Receipts）
 # ---------------------------------------
-BQ_SQL = r"""
+# 置換: BQ_SQL -> BQ_SQL_ACTIVE_POOLS
+BQ_SQL_ACTIVE_POOLS = r"""
 DECLARE from_block INT64 DEFAULT @from_block;
 DECLARE to_block   INT64 DEFAULT @to_block;
 
-DECLARE logs_table STRING      DEFAULT @logs_table;
-DECLARE tx_table   STRING      DEFAULT @tx_table;
-DECLARE rcpt_table STRING      DEFAULT @rcpt_table;
+DECLARE dataset    STRING DEFAULT @dataset;
+DECLARE logs_table STRING DEFAULT CONCAT(dataset, ".logs");
+DECLARE tx_table   STRING DEFAULT CONCAT(dataset, ".transactions");
+DECLARE rcpt_table STRING DEFAULT CONCAT(dataset, ".receipts");
 
-DECLARE v2_factories ARRAY<STRING> DEFAULT @v2_factories;
-DECLARE v3_factories ARRAY<STRING> DEFAULT @v3_factories;
+DECLARE pools ARRAY<STRING> DEFAULT @pools;
 
-DECLARE topic_swap_v2      STRING DEFAULT '0xd78ad95fa46c994b6551d0da85fc275fe613ce37657fb8d5e3d130840159d822';
-DECLARE topic_swap_v3      STRING DEFAULT '0xc42079a4f72e13aa39cc39dce8d3bb0d7d2cc3f3eaa062b1c9d2e6f5d97d0e00';
-DECLARE topic_pair_created STRING DEFAULT '0x0d3648bd0f6ba80134a33ba9275ac585d9d315f0ad8355cddefde31afa28d0e9';
-DECLARE topic_pool_created STRING DEFAULT '0x783cca1c0412dd0d695e784568c77eebfb38b9f99b953539b81e6fbcbbd4e5f9';
+DECLARE topic_swap_v2 STRING DEFAULT '0xd78ad95fa46c994b6551d0da85fc275fe613ce37657fb8d5e3d130840159d822';
+DECLARE topic_swap_v3 STRING DEFAULT '0xc42079a4f72e13aa39cc39dce8d3bb0d7d2cc3f3eaa062b1c9d2e6f5d97d0e00';
 
 EXECUTE IMMEDIATE (
   '''
-  WITH pools_v2 AS (
-    SELECT DISTINCT LOWER(CONCAT('0x', SUBSTR(data, 27, 40))) AS pool
-    FROM ''' || logs_table || '''
-    WHERE ARRAY_LENGTH(topics) >= 1
-      AND topics[SAFE_OFFSET(0)] = @topic_pair_created
-      AND LOWER(address) IN (SELECT LOWER(f) FROM UNNEST(@v2_factories) AS f)
-      AND block_number BETWEEN @from_block AND @to_block
-  ),
-  pools_v3 AS (
-    SELECT DISTINCT LOWER(CONCAT('0x', SUBSTR(data, LENGTH(data) - 39, 40))) AS pool
-    FROM ''' || logs_table || '''
-    WHERE ARRAY_LENGTH(topics) >= 1
-      AND topics[SAFE_OFFSET(0)] = @topic_pool_created
-      AND LOWER(address) IN (SELECT LOWER(f) FROM UNNEST(@v3_factories) AS f)
-      AND block_number BETWEEN @from_block AND @to_block
-  ),
-  pools AS (
-    SELECT pool FROM pools_v2
-    UNION DISTINCT
-    SELECT pool FROM pools_v3
-  ),
-  swap_txs AS (
+    WITH swap_txs AS (
+      SELECT
+        l.transaction_hash AS tx_hash,
+        ANY_VALUE(l.block_number) AS block_number
+      FROM ''' || logs_table || ''' AS l
+      WHERE ARRAY_LENGTH(l.topics) >= 1
+        AND l.topics[SAFE_OFFSET(0)] IN (@topic_swap_v2, @topic_swap_v3)
+        AND LOWER(l.address) IN (SELECT p FROM UNNEST(@pools) AS p)
+        AND l.block_number BETWEEN @from_block AND @to_block
+      GROUP BY tx_hash
+    ),
+    tx_norm AS (
+      SELECT
+        t.transaction_hash,
+        CAST(t.block_timestamp AS STRING) AS block_timestamp,
+        t.transaction_index,
+        t.from_address,
+        t.to_address,
+        COALESCE(
+          SAFE_CAST(JSON_VALUE(TO_JSON_STRING(t.value), '$.bignumeric_value') AS BIGNUMERIC),
+          SAFE_CAST(JSON_VALUE(TO_JSON_STRING(t.value), '$.string_value')     AS BIGNUMERIC),
+          SAFE_CAST(TO_JSON_STRING(t.value)                                   AS BIGNUMERIC)
+        ) AS value_wei,
+        COALESCE(
+          SAFE_CAST(JSON_VALUE(TO_JSON_STRING(t.gas_price), '$.bignumeric_value') AS BIGNUMERIC),
+          SAFE_CAST(JSON_VALUE(TO_JSON_STRING(t.gas_price), '$.string_value')     AS BIGNUMERIC),
+          SAFE_CAST(TO_JSON_STRING(t.gas_price)                                   AS BIGNUMERIC)
+        ) AS gas_price_tx,
+        r.gas_used,
+        COALESCE(
+          SAFE_CAST(JSON_VALUE(TO_JSON_STRING(r.effective_gas_price), '$.bignumeric_value') AS BIGNUMERIC),
+          SAFE_CAST(JSON_VALUE(TO_JSON_STRING(r.effective_gas_price), '$.string_value')     AS BIGNUMERIC),
+          SAFE_CAST(TO_JSON_STRING(r.effective_gas_price)                                   AS BIGNUMERIC)
+        ) AS gas_price_rcpt,
+        r.status
+      FROM ''' || tx_table || ''' AS t
+      JOIN ''' || rcpt_table || ''' AS r
+        USING (transaction_hash)
+    )
     SELECT
-      l.transaction_hash AS tx_hash,
-      ANY_VALUE(l.block_number) AS block_number
-    FROM ''' || logs_table || ''' AS l
-    JOIN pools p ON LOWER(l.address) = p.pool
-    WHERE ARRAY_LENGTH(l.topics) >= 1
-      AND l.topics[SAFE_OFFSET(0)] IN (@topic_swap_v2, @topic_swap_v3)
-      AND l.block_number BETWEEN @from_block AND @to_block
-    GROUP BY tx_hash
-  )
-  SELECT
-    t.block_number,
-    CAST(t.block_timestamp AS STRING) AS block_timestamp,
-    t.transaction_index,
-    t.transaction_hash,
-    t.from_address,
-    t.to_address,
-    CAST(t.value AS BIGNUMERIC)                    AS value_wei,
-    r.gas_used,
-    CAST(COALESCE(t.gas_price, r.effective_gas_price) AS BIGNUMERIC) AS gas_price_wei,
-    CAST(r.effective_gas_price AS BIGNUMERIC)      AS effective_gas_price_wei,
-    r.status
-  FROM ''' || tx_table || ''' AS t
-  JOIN swap_txs s
-    ON t.transaction_hash = s.tx_hash
-  JOIN ''' || rcpt_table || ''' AS r
-    USING (transaction_hash)
+      s.block_number AS block_number,
+      n.block_timestamp,
+      n.transaction_index,
+      s.tx_hash       AS transaction_hash,
+      n.from_address,
+      n.to_address,
+      n.value_wei,
+      n.gas_used,
+      COALESCE(n.gas_price_tx, n.gas_price_rcpt) AS gas_price_wei,
+      n.gas_price_rcpt                           AS effective_gas_price_wei,
+      n.status
+    FROM swap_txs s
+    JOIN tx_norm n
+      ON n.transaction_hash = s.tx_hash
   '''
 )
 USING
   from_block AS from_block,
-  to_block AS to_block,
-  topic_pair_created AS topic_pair_created,
-  topic_pool_created AS topic_pool_created,
+  to_block   AS to_block,
+  dataset    AS dataset,
+  pools      AS pools,
   topic_swap_v2 AS topic_swap_v2,
-  topic_swap_v3 AS topic_swap_v3,
-  v2_factories AS v2_factories,
-  v3_factories AS v3_factories;
+  topic_swap_v3 AS topic_swap_v3;
 """
 
 
 # ---------------------------------------
 # BigQuery 実行 → TxRow[]
 # ---------------------------------------
-async def bq_fetch_tx_rows(
-    dataset: str,  # 例: "bigquery-public-data.goog_blockchain_ethereum_mainnet_us"
-    v2_factories: List[str],  # V2のFactoryアドレス群（無ければ []）
-    v3_factories: List[str],  # V3のFactoryアドレス群（無ければ []）
+async def bq_fetch_tx_rows_for_pools(
+    dataset: str,
+    pools_lower: List[str],
     from_block: int,
     to_block: int,
 ) -> List[TxRow]:
+    if not pools_lower:
+        return []
     client = bq_client()
-
-    logs_table = f"{dataset}.logs"
-    tx_table = f"{dataset}.transactions"
+    logs_table = f"{dataset}.logs"        # 使っていないが参照残し可
+    tx_table   = f"{dataset}.transactions"
     rcpt_table = f"{dataset}.receipts"
 
     job_config = QueryJobConfig(
         query_parameters=[
             ScalarQueryParameter("from_block", "INT64", from_block),
             ScalarQueryParameter("to_block", "INT64", to_block),
-            ScalarQueryParameter("logs_table", "STRING", logs_table),
-            ScalarQueryParameter("tx_table", "STRING", tx_table),
-            ScalarQueryParameter("rcpt_table", "STRING", rcpt_table),
-            # ARRAY<STRING> は 'STRING' の配列として渡す
-            # google-cloud-bigquery では ArrayQueryParameter でもOKですが、
-            # ScalarQueryParameter + list でも解釈されます
-            # 明示したい場合: from google.cloud.bigquery import ArrayQueryParameter
-            # ArrayQueryParameter("v2_factories", "STRING", v2_factories)
-            ArrayQueryParameter("v2_factories", "STRING", v2_factories),
-            ArrayQueryParameter("v3_factories", "STRING", v3_factories),
+            ScalarQueryParameter("dataset", "STRING", dataset),
+            ArrayQueryParameter("pools", "STRING", pools_lower),
         ]
     )
 
     def _q():
-        return client.query(BQ_SQL, job_config=job_config)
+        return client.query(BQ_SQL_ACTIVE_POOLS, job_config=job_config)
 
     t0 = time.time()
-    job = await retry_async(lambda: asyncio.to_thread(_q), label="bq.tx_window")
+    job = await retry_async(lambda: asyncio.to_thread(_q), label="bq.tx_active_pools")
     rows: List[TxRow] = []
     for r in job:
         rows.append(
@@ -220,25 +215,13 @@ async def bq_fetch_tx_rows(
                 to_address=r.get("to_address"),
                 value_wei=int(r["value_wei"]) if r.get("value_wei") is not None else 0,
                 gas_used=int(r["gas_used"]) if r.get("gas_used") is not None else None,
-                gas_price_wei=(
-                    int(r["gas_price_wei"])
-                    if r.get("gas_price_wei") is not None
-                    else None
-                ),
-                effective_gas_price_wei=(
-                    int(r["effective_gas_price_wei"])
-                    if r.get("effective_gas_price_wei") is not None
-                    else None
-                ),
+                gas_price_wei=int(r["gas_price_wei"]) if r.get("gas_price_wei") is not None else None,
+                effective_gas_price_wei=int(r["effective_gas_price_wei"]) if r.get("effective_gas_price_wei") is not None else None,
                 status=int(r["status"]) if r.get("status") is not None else None,
             )
         )
-    print(
-        f"[BQ] fetched rows={len(rows)} for {from_block}-{to_block} in {time.time()-t0:.2f}s"
-    )
+    print(f"[BQ] (active pools) fetched rows={len(rows)} for {from_block}-{to_block} in {time.time()-t0:.2f}s")
     return rows
-
-
 # ---------------------------------------
 # UPSERT to transactions
 # ---------------------------------------
@@ -329,70 +312,50 @@ async def backfill_transactions_uniswap(
                 print(f"[{chain_name}] no last_block_number, skip")
                 continue
 
-            # 該当チェーンの全FactoryをJOINで取得（version名でV2/V3判定）
-            fq = (
+            # ★ is_activeなプールを取得（address, created_block_number）
+            pq = (
                 select(
-                    DefiFactory.created_block_number,
-                    DefiFactory.address,
-                    func.lower(DefiVersion.name).label("ver"),
+                    func.lower(DefiPool.address),
+                    DefiPool.created_block_number,
                 )
-                .join(DefiVersion, DefiVersion.id == DefiFactory.defi_version_id)
-                .where(DefiFactory.chain_id == chain_id_db)
+                .where(
+                    DefiPool.chain_id == chain_id_db,
+                    DefiPool.is_active.is_(True),
+                )
             )
-            rows = (await session.execute(fq)).all()
-
-            v2_factories = []
-            v3_factories = []
-            start_blk = None
-
-            for created_blk, addr, ver in rows:
-                if "v2" in ver:
-                    v2_factories.append(addr)
-                elif "v3" in ver:
-                    v3_factories.append(addr)
-                # 走査開始ブロックはチェーン上の全Factoryの “最小 created_block_number” を採用
-                if created_blk and (start_blk is None or created_blk < start_blk):
-                    start_blk = int(created_blk)
-
-            if not v2_factories and not v3_factories:
-                print(f"[{chain_name}] no v2/v3 factories (versions), skip")
+            pool_rows = (await session.execute(pq)).all()
+            if not pool_rows:
+                print(f"[{chain_name}] no active pools, skip")
                 continue
 
-            if start_blk is None:
-                print(f"[{chain_name}] no factories, skip")
-                continue
-
+            pools_lower = [addr for (addr, _cb) in pool_rows]
+            start_blk = min(int(cb) for (_a, cb) in pool_rows if cb is not None) if any(cb for (_a, cb) in pool_rows) else 0
             end_blk = int(chain_last)
-            print(
-                f"[{chain_name}] V2={len(v2_factories)} V3={len(v3_factories)} scan {start_blk}-{end_blk} step={window_blocks}"
-            )
 
-            # 10万刻みで窓を回して取得＆UPSERT
+            print(f"[{chain_name}] active_pools={len(pools_lower)} scan {start_blk}-{end_blk} step={window_blocks}")
+
+            # ウィンドウ×プールバッチで実行
             win_from = start_blk
             while win_from <= end_blk and not _shutdown:
                 win_to = min(win_from + window_blocks - 1, end_blk)
                 print(f"[{chain_name}] window {win_from}-{win_to} ...")
 
-                try:
-                    tx_rows = await bq_fetch_tx_rows(
-                        dataset=dataset,
-                        v2_factories=v2_factories,
-                        v3_factories=v3_factories,
-                        from_block=win_from,
-                        to_block=win_to,
-                    )
-                    if tx_rows:
-                        n = await upsert_transactions(session, chain_id_db, tx_rows)
-                    else:
-                        n = 0
-                    print(
-                        f"[{chain_name}] window {win_from}-{win_to} fetched={len(tx_rows)} upserted={n}"
-                    )
-                except Exception as e:
-                    print(
-                        f"[{chain_name}] window {win_from}-{win_to} ERROR: {e} (skip)"
-                    )
+                total_upserted = 0
+                for batch in chunked(pools_lower, POOLS_BATCH):
+                    try:
+                        tx_rows = await bq_fetch_tx_rows_for_pools(
+                            dataset=dataset,
+                            pools_lower=batch,
+                            from_block=win_from,
+                            to_block=win_to,
+                        )
+                        if tx_rows:
+                            n = await upsert_transactions(session, chain_id_db, tx_rows)
+                            total_upserted += n
+                    except Exception as e:
+                        print(f"[{chain_name}] window {win_from}-{win_to} pools_batch({len(batch)}) ERROR: {e} (skip batch)")
 
+                print(f"[{chain_name}] window {win_from}-{win_to} upserted_total={total_upserted}")
                 win_from = win_to + 1
 
     print(f"[DONE] total_elapsed={time.time()-t_all:.2f}s")

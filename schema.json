@@ -201,56 +201,6 @@
       "default": "now()"
     }
   ],
-  "defi_factories": [
-    {
-      "name": "id",
-      "type": "INTEGER",
-      "nullable": false,
-      "default": "nextval('defi_factories_id_seq'::regclass)"
-    },
-    {
-      "name": "defi_version_id",
-      "type": "INTEGER",
-      "nullable": false,
-      "default": "None"
-    },
-    {
-      "name": "chain_id",
-      "type": "INTEGER",
-      "nullable": false,
-      "default": "None"
-    },
-    {
-      "name": "address",
-      "type": "VARCHAR",
-      "nullable": false,
-      "default": "None"
-    },
-    {
-      "name": "last_gotten_block_number",
-      "type": "INTEGER",
-      "nullable": false,
-      "default": "None"
-    },
-    {
-      "name": "created_block_number",
-      "type": "BIGINT",
-      "nullable": false,
-      "default": "None"
-    },
-    {
-      "name": "created_at",
-      "type": "TIMESTAMP",
-      "nullable": false,
-      "default": "now()"
-    },
-    {
-      "name": "updated_at",
-      "type": "TIMESTAMP",
-      "nullable": false,
-      "default": "now()"
-    }
-  ],
   "defi_pools": [
     {
       "name": "id",
@@ -309,6 +259,92 @@
     {
       "name": "fee_tier_bps",
       "type": "INTEGER",
+      "nullable": false,
+      "default": "None"
+    },
+    {
+      "name": "created_at",
+      "type": "TIMESTAMP",
+      "nullable": false,
+      "default": "now()"
+    },
+    {
+      "name": "updated_at",
+      "type": "TIMESTAMP",
+      "nullable": false,
+      "default": "now()"
+    },
+    {
+      "name": "is_active",
+      "type": "BOOLEAN",
+      "nullable": false,
+      "default": "None"
+    },
+    {
+      "name": "last_swap_block",
+      "type": "BIGINT",
+      "nullable": true,
+      "default": "None"
+    },
+    {
+      "name": "last_swap_at",
+      "type": "TIMESTAMP",
+      "nullable": true,
+      "default": "None"
+    },
+    {
+      "name": "swaps_24h",
+      "type": "INTEGER",
+      "nullable": false,
+      "default": "None"
+    },
+    {
+      "name": "swaps_7d",
+      "type": "INTEGER",
+      "nullable": false,
+      "default": "None"
+    },
+    {
+      "name": "activity_score",
+      "type": "INTEGER",
+      "nullable": false,
+      "default": "None"
+    }
+  ],
+  "defi_factories": [
+    {
+      "name": "id",
+      "type": "INTEGER",
+      "nullable": false,
+      "default": "nextval('defi_factories_id_seq'::regclass)"
+    },
+    {
+      "name": "defi_version_id",
+      "type": "INTEGER",
+      "nullable": false,
+      "default": "None"
+    },
+    {
+      "name": "chain_id",
+      "type": "INTEGER",
+      "nullable": false,
+      "default": "None"
+    },
+    {
+      "name": "address",
+      "type": "VARCHAR",
+      "nullable": false,
+      "default": "None"
+    },
+    {
+      "name": "last_gotten_block_number",
+      "type": "INTEGER",
+      "nullable": false,
+      "default": "None"
+    },
+    {
+      "name": "created_block_number",
+      "type": "BIGINT",
       "nullable": false,
       "default": "None"
     },
