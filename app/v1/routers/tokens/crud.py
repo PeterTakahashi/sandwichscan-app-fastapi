@@ -10,6 +10,9 @@ from app.v1.dependencies.models.token.get_token_by_id import (
 from app.v1.dependencies.services.token_service import get_token_service
 from app.v1.services.token_service import TokenService
 from app.models.token import Token
+from app.v1.dependencies.query_params.get_token_search_params import (
+    get_token_search_params,
+)
 
 from app.core.routers.api_router import APIRouter
 
@@ -23,7 +26,7 @@ router = APIRouter(prefix="/tokens", tags=["Tokens"])
 )
 async def list_tokens(
     request: Request,
-    search_params: TokenSearchParams = Depends(),
+    search_params: TokenSearchParams = Depends(get_token_search_params),
     service: TokenService = Depends(get_token_service),
 ):
     """

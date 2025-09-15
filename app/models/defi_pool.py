@@ -8,6 +8,7 @@ from datetime import datetime
 
 if TYPE_CHECKING:
     from app.models.defi_factory import DefiFactory
+    from app.models.defi_version import DefiVersion
     from app.models.chain import Chain
     from app.models.token import Token
 
@@ -57,6 +58,9 @@ class DefiPool(TimestampMixin, Base):
 
     defi_factory: Mapped["DefiFactory"] = relationship(
         "DefiFactory", back_populates="defi_pools"
+    )
+    defi_version: Mapped["DefiVersion"] = relationship(
+        "DefiVersion", secondary="defi_factories", viewonly=True
     )
     chain: Mapped["Chain"] = relationship("Chain", back_populates="defi_pools")
     token0: Mapped["Token"] = relationship(

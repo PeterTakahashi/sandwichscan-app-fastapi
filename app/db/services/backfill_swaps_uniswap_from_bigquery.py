@@ -206,7 +206,8 @@ def decode_swap_v2(row: SwapLogRow) -> DecodedSwap:
     recipient = _addr_from_topic(row.topics[2]) if len(row.topics) > 2 else None
     # data: (uint256 amount0In, uint256 amount1In, uint256 amount0Out, uint256 amount1Out)
     a0in, a1in, a0out, a1out = abi_decode(
-        ["uint256", "uint256", "uint256", "uint256"], bytes.fromhex(_strip_0x(row.data))
+        ["uint256", "uint256", "uint256", "uint256"],
+        bytes.fromhex(_strip_0x(row.data)),
     )
     return DecodedSwap(
         pool_addr_lower=row.pool,
@@ -255,7 +256,7 @@ def decode_swap_v3(row: SwapLogRow) -> DecodedSwap:
     )
 
 
-# ---------------- DB UPSERT ---------------- #
+# ---------------- DB helpers ---------------- #
 
 
 async def _map_tx_hashes_to_ids(
@@ -263,7 +264,7 @@ async def _map_tx_hashes_to_ids(
 ) -> Dict[str, int]:
     hs = list(set(tx_hashes))
     out: Dict[str, int] = {}
-    for batch in chunked(hs, 10_000):  # 大きめでもOK（IN句上限ケア）
+    for batch in chunked(hs, 10_000):  # IN句上限ケア
         rows = (
             await session.execute(
                 select(Transaction.id, Transaction.tx_hash).where(
@@ -276,10 +277,36 @@ async def _map_tx_hashes_to_ids(
     return out
 
 
+# ---------------- UPSERT ---------------- #
+
+
+def _decide_sell_buy(
+    t0_id: Optional[int],
+    t1_id: Optional[int],
+    a0_in: int,
+    a1_in: int,
+    a0_out: int,
+    a1_out: int,
+) -> Tuple[Optional[int], Optional[int]]:
+    sell_id = None
+    buy_id = None
+    # 「in 側 = 売り」「out 側 = 買い」
+    if a0_in > 0:
+        sell_id = t0_id
+    if a1_in > 0:
+        sell_id = t1_id if t1_id is not None else sell_id
+    if a0_out > 0:
+        buy_id = t0_id
+    if a1_out > 0:
+        buy_id = t1_id if t1_id is not None else buy_id
+    return sell_id, buy_id
+
+
 async def upsert_swaps(
     session,
     chain_id_db: int,
     pool_addr_to_id_lower: Dict[str, int],
+    pool_tokens: Dict[int, Tuple[Optional[int], Optional[int]]],
     decoded: List[DecodedSwap],
 ) -> int:
     if not decoded:
@@ -289,7 +316,8 @@ async def upsert_swaps(
     tx_map = await _map_tx_hashes_to_ids(
         session, chain_id_db, (d.tx_hash for d in decoded)
     )
-    # 2) payload 構築（transactionが無いものはスキップ）
+
+    # 2) payload 構築
     payload: List[Dict[str, Any]] = []
     skipped = 0
     for d in decoded:
@@ -298,6 +326,16 @@ async def upsert_swaps(
         if not tx_id or not pool_id:
             skipped += 1
             continue
+        t0_id, t1_id = pool_tokens.get(pool_id, (None, None))
+        sell_id, buy_id = _decide_sell_buy(
+            t0_id,
+            t1_id,
+            int(d.amount0_in_raw or 0),
+            int(d.amount1_in_raw or 0),
+            int(d.amount0_out_raw or 0),
+            int(d.amount1_out_raw or 0),
+        )
+
         payload.append(
             dict(
                 chain_id=chain_id_db,
@@ -313,8 +351,11 @@ async def upsert_swaps(
                 sqrt_price_x96=d.sqrt_price_x96,
                 liquidity_raw=d.liquidity_raw,
                 tick=d.tick,
+                sell_token_id=sell_id,
+                buy_token_id=buy_id,
             )
         )
+
     if skipped:
         print(f"[DB] swaps skip(no tx_id or pool_id)={skipped}")
 
@@ -337,6 +378,8 @@ async def upsert_swaps(
                     "sqrt_price_x96": pg_insert(Swap).excluded.sqrt_price_x96,
                     "liquidity_raw": pg_insert(Swap).excluded.liquidity_raw,
                     "tick": pg_insert(Swap).excluded.tick,
+                    "sell_token_id": pg_insert(Swap).excluded.sell_token_id,
+                    "buy_token_id": pg_insert(Swap).excluded.buy_token_id,
                 },
             )
         )
@@ -377,7 +420,9 @@ async def backfill_swaps_uniswap(
                 continue
 
             # active pool を取得
-            pq = select(DefiPool.id, DefiPool.address).where(
+            pq = select(
+                DefiPool.id, DefiPool.address, DefiPool.token0_id, DefiPool.token1_id
+            ).where(
                 DefiPool.chain_id == chain_id_db,
                 DefiPool.is_active.is_(True),
             )
@@ -386,15 +431,27 @@ async def backfill_swaps_uniswap(
                 print(f"[{chain_name}] no active pools, skip")
                 continue
 
-            pool_addr_to_id_lower = {addr.lower(): pid for (pid, addr) in pools}
+            pool_addr_to_id_lower: Dict[str, int] = {
+                addr.lower(): pid for (pid, addr, _t0, _t1) in pools
+            }
+            pool_tokens: Dict[int, Tuple[Optional[int], Optional[int]]] = {
+                pid: (t0, t1) for (pid, _addr, t0, t1) in pools
+            }
             pools_lower = list(pool_addr_to_id_lower.keys())
 
             # スキャン範囲：もっとも古いcreated_block〜latest
-            start_blk_q = select(DefiPool.created_block_number).where(
-                DefiPool.chain_id == chain_id_db,
-                DefiPool.is_active.is_(True),
+            cb_rows = (
+                (
+                    await session.execute(
+                        select(DefiPool.created_block_number).where(
+                            DefiPool.chain_id == chain_id_db,
+                            DefiPool.is_active.is_(True),
+                        )
+                    )
+                )
+                .scalars()
+                .all()
             )
-            cb_rows = (await session.execute(start_blk_q)).scalars().all()
             start_blk = (
                 int(min(cb for cb in cb_rows if cb is not None)) if cb_rows else 0
             )
@@ -435,7 +492,11 @@ async def backfill_swaps_uniswap(
 
                 # DB upsert
                 n = await upsert_swaps(
-                    session, chain_id_db, pool_addr_to_id_lower, decoded_all
+                    session,
+                    chain_id_db,
+                    pool_addr_to_id_lower,
+                    pool_tokens,
+                    decoded_all,
                 )
                 print(f"[{chain_name}] window {win_from}-{win_to} swaps_upserted={n}")
 
