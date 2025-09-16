@@ -290,3 +290,26 @@ async def update_transaction_gas_price_usd(
     await session.execute(stmt)
     await session.flush()
     return True
+
+
+async def update_swap_gas_price_usd(
+    session: AsyncSession,
+    swap_id: int,
+) -> bool:
+    """
+    Update a single swap's transaction's gas_price_usd using on-chain ETHUSD at the tx block.
+
+    Returns True if updated, False if skipped (e.g., missing gas_used/price or price not found).
+    """
+    # Fetch necessary fields
+    swaps = await session.execute(
+        select(
+            Swap.id,
+            Swap.transaction_id,
+        )
+        .where(Swap.id == swap_id)
+    )
+    swap = swaps.first()
+    if not swap:
+        return False
+    return await update_transaction_gas_price_usd(session, transaction_id=int(swap.transaction_id))
