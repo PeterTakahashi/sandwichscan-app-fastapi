@@ -39,15 +39,12 @@ class SandwichAttack(TimestampMixin, Base):
         ForeignKey("tokens.id", ondelete="SET NULL"), nullable=True, index=True
     )
 
-    # 経済量（raw=整数、正規化=小数）
-    victim_base_size_raw: Mapped[int | None] = mapped_column(
+    revenue_base_raw: Mapped[int] = mapped_column(Numeric(78, 0), nullable=True)
+    gas_fee_wei_attacker: Mapped[int] = mapped_column(
         Numeric(78, 0), nullable=True
     )
-    profit_base_raw: Mapped[int | None] = mapped_column(Numeric(78, 0), nullable=True)
-    harm_base_raw: Mapped[int | None] = mapped_column(Numeric(78, 0), nullable=True)
-
-    # ガス（攻撃者負担/全体）
-    gas_fee_wei_attacker: Mapped[int | None] = mapped_column(
+    profit_base_raw: Mapped[int] = mapped_column(Numeric(78, 0), nullable=True)
+    harm_base_raw: Mapped[int] = mapped_column(
         Numeric(78, 0), nullable=True
     )
 
