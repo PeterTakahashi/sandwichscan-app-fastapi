@@ -8,6 +8,7 @@ from .transaction import Transaction
 from .swap import Swap
 from .sandwich_attack import SandwichAttack
 from .usd_stable_coin import UsdStableCoin
+from .wrapped_native_token import WrappedNativeToken
 
 __all__ = [
     "Chain",
@@ -20,4 +21,5 @@ __all__ = [
     "Swap",
     "SandwichAttack",
     "UsdStableCoin",
+    "WrappedNativeToken",
 ]

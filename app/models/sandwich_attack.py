@@ -70,11 +70,6 @@ class SandwichAttack(TimestampMixin, Base):
     profit_usd: Mapped[float | None] = mapped_column(Numeric(38, 18), nullable=True)
     harm_usd: Mapped[float | None] = mapped_column(Numeric(38, 18), nullable=True)
 
-    detected_by: Mapped[str | None] = mapped_column(
-        String, nullable=True
-    )  # 検出器名/バージョン
-    notes: Mapped[str | None] = mapped_column(String, nullable=True)
-
     __table_args__ = (
         UniqueConstraint(
             "front_attack_swap_id",

@@ -38,6 +38,7 @@ class Transaction(TimestampMixin, Base):
     effective_gas_price_wei: Mapped[int | None] = mapped_column(
         Numeric(78, 0), nullable=True
     )
+    gas_price_usd: Mapped[float | None] = mapped_column(Numeric(38, 18), nullable=True)
 
     status: Mapped[int | None] = mapped_column(
         SmallInteger, nullable=True
