@@ -46,6 +46,3 @@ class WrappedNativeToken(TimestampMixin, Base):
     usd_uniswap_v2_pool: Mapped["DefiPool"] = relationship("DefiPool", foreign_keys="[WrappedNativeToken.usd_uniswap_v2_pool_id]")
     usd_uniswap_v3_pool: Mapped["DefiPool"] = relationship("DefiPool", foreign_keys="[WrappedNativeToken.usd_uniswap_v3_pool_id]")
     usd_stable_coin: Mapped["UsdStableCoin"] = relationship("UsdStableCoin")
-    usd_stable_coin_token: Mapped["Token"] = relationship(
-        "Token", viewonly=True, foreign_keys="[UsdStableCoin.token_id]"
-    )
