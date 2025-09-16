@@ -9,12 +9,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.swap import Swap
 from app.models.transaction import Transaction
 from app.models.defi_pool import DefiPool
+
 # from app.v1.services.sandwich_attack_service import (
 #     create_sandwich_attack_if_pricable,
 # )
 from app.db.session import async_session_maker
 import argparse
 import asyncio
+
 
 @dataclass
 class SwapRow:
@@ -37,11 +39,21 @@ class SwapRow:
 
 
 def _dir_token0_to_token1(s: SwapRow) -> bool:
-    return int(s.amount0_in_raw) > 0 and int(s.amount1_out_raw) > 0 and int(s.amount1_in_raw) == 0 and int(s.amount0_out_raw) == 0
+    return (
+        int(s.amount0_in_raw) > 0
+        and int(s.amount1_out_raw) > 0
+        and int(s.amount1_in_raw) == 0
+        and int(s.amount0_out_raw) == 0
+    )
 
 
 def _dir_token1_to_token0(s: SwapRow) -> bool:
-    return int(s.amount1_in_raw) > 0 and int(s.amount0_out_raw) > 0 and int(s.amount0_in_raw) == 0 and int(s.amount1_out_raw) == 0
+    return (
+        int(s.amount1_in_raw) > 0
+        and int(s.amount0_out_raw) > 0
+        and int(s.amount0_in_raw) == 0
+        and int(s.amount1_out_raw) == 0
+    )
 
 
 def _dir_sign(s: SwapRow, *, base_is_token0: bool) -> int:
@@ -58,7 +70,9 @@ def _dir_sign(s: SwapRow, *, base_is_token0: bool) -> int:
     return 0
 
 
-def _attacker_gas_fee_wei(front_attack_swap: SwapRow, back_attack_swap: SwapRow) -> Optional[int]:
+def _attacker_gas_fee_wei(
+    front_attack_swap: SwapRow, back_attack_swap: SwapRow
+) -> Optional[int]:
     def pick(p: Optional[int], q: Optional[int]) -> Optional[int]:
         return p if p is not None else q
 
@@ -66,9 +80,7 @@ def _attacker_gas_fee_wei(front_attack_swap: SwapRow, back_attack_swap: SwapRow)
     known = False
     for s in (front_attack_swap, back_attack_swap):
         if s.gas_used is not None:
-            gp = pick(
-                s.gas_price_wei_effective, s.gas_price_wei_legacy
-            )
+            gp = pick(s.gas_price_wei_effective, s.gas_price_wei_legacy)
             if gp is not None:
                 total += int(s.gas_used) * int(gp)
                 known = True
@@ -158,7 +170,9 @@ async def detect_and_insert_for_pool(
     Note: harm_base_raw is set to 0 for now (no reserve snapshots available).
     """
     # Ensure pool exists (and to get token0/token1 if we need later)
-    pool_row = await session.execute(select(DefiPool).where(DefiPool.id == defi_pool_id))
+    pool_row = await session.execute(
+        select(DefiPool).where(DefiPool.id == defi_pool_id)
+    )
     pool = pool_row.scalars().first()
     if not pool:
         return 0
@@ -182,7 +196,9 @@ async def detect_and_insert_for_pool(
             front_attack_swap = swaps[front_idx]
             # Determine EOA actors (prefer tx_from over event sender which is often a router)
             victim_actor = (victim_swap.tx_from or victim_swap.sender or "").lower()
-            attacker_actor = (front_attack_swap.tx_from or front_attack_swap.sender or "").lower()
+            attacker_actor = (
+                front_attack_swap.tx_from or front_attack_swap.sender or ""
+            ).lower()
             # skip if victim and A1 are the same EOA
             if attacker_actor == victim_actor:
                 continue
@@ -191,7 +207,7 @@ async def detect_and_insert_for_pool(
             base_token_id = front_attack_swap.sell_token_id
             if base_token_id is None:
                 continue
-            base_is_token0 = (base_token_id == pool.token0_id)
+            base_is_token0 = base_token_id == pool.token0_id
             if not base_is_token0 and base_token_id != pool.token1_id:
                 # inconsistent data
                 continue
@@ -223,17 +239,31 @@ async def detect_and_insert_for_pool(
 
             for back_idx in range(victim_idx + 1, post_end):
                 back_attack_swap = swaps[back_idx]
-                back_actor = (back_attack_swap.tx_from or back_attack_swap.sender or "").lower()
+                back_actor = (
+                    back_attack_swap.tx_from or back_attack_swap.sender or ""
+                ).lower()
                 # attacker must match A1 EOA
                 if back_actor != attacker_actor:
                     continue
 
                 # block gap constraint
-                if abs(int(back_attack_swap.block_number) - int(front_attack_swap.block_number)) > max_block_gap:
+                if (
+                    abs(
+                        int(back_attack_swap.block_number)
+                        - int(front_attack_swap.block_number)
+                    )
+                    > max_block_gap
+                ):
                     continue
 
                 # V must be between A1 and A2 in block order
-                if not (min(front_attack_swap.block_number, back_attack_swap.block_number) <= victim_swap.block_number <= max(front_attack_swap.block_number, back_attack_swap.block_number)):
+                if not (
+                    min(front_attack_swap.block_number, back_attack_swap.block_number)
+                    <= victim_swap.block_number
+                    <= max(
+                        front_attack_swap.block_number, back_attack_swap.block_number
+                    )
+                ):
                     continue
 
                 dir_back = _dir_sign(back_attack_swap, base_is_token0=base_is_token0)
@@ -241,24 +271,38 @@ async def detect_and_insert_for_pool(
                     continue
 
                 # victim base size threshold
-                victim_base_size_raw = max(victim_swap.amount0_in_raw, victim_swap.amount0_out_raw) if base_is_token0 else max(victim_swap.amount1_in_raw, victim_swap.amount1_out_raw)
+                victim_base_size_raw = (
+                    max(victim_swap.amount0_in_raw, victim_swap.amount0_out_raw)
+                    if base_is_token0
+                    else max(victim_swap.amount1_in_raw, victim_swap.amount1_out_raw)
+                )
                 if int(victim_base_size_raw) <= int(min_victim_base_raw):
                     continue
 
                 # profit calculation (closed round-trip)
                 if base_is_token0:
-                    if _dir_token0_to_token1(front_attack_swap) and _dir_token1_to_token0(back_attack_swap):
-                        profit_base_raw = int(back_attack_swap.amount0_out_raw) - int(front_attack_swap.amount0_in_raw)
+                    if _dir_token0_to_token1(
+                        front_attack_swap
+                    ) and _dir_token1_to_token0(back_attack_swap):
+                        profit_base_raw = int(back_attack_swap.amount0_out_raw) - int(
+                            front_attack_swap.amount0_in_raw
+                        )
                     else:
                         continue
                 else:
-                    if _dir_token1_to_token0(front_attack_swap) and _dir_token0_to_token1(back_attack_swap):
-                        profit_base_raw = int(back_attack_swap.amount1_out_raw) - int(front_attack_swap.amount1_in_raw)
+                    if _dir_token1_to_token0(
+                        front_attack_swap
+                    ) and _dir_token0_to_token1(back_attack_swap):
+                        profit_base_raw = int(back_attack_swap.amount1_out_raw) - int(
+                            front_attack_swap.amount1_in_raw
+                        )
                     else:
                         continue
 
                 # gas for attacker legs
-                gas_fee_wei_attacker = _attacker_gas_fee_wei(front_attack_swap, back_attack_swap)
+                gas_fee_wei_attacker = _attacker_gas_fee_wei(
+                    front_attack_swap, back_attack_swap
+                )
                 if gas_fee_wei_attacker is None:
                     # pricing requires ETHUSD; but we could still save if we choose.
                     # As per policy, skip if we cannot compute cost.
@@ -305,14 +349,28 @@ async def detect_and_insert_for_pool(
 
 
 def _build_arg_parser():
-    ap = argparse.ArgumentParser(description="Detect and insert sandwich attacks for a pool")
+    ap = argparse.ArgumentParser(
+        description="Detect and insert sandwich attacks for a pool"
+    )
     ap.add_argument("--pool-id", type=int, required=True, help="Target defi_pool.id")
-    ap.add_argument("--window-pre", type=int, default=3, help="Search window size before victim")
-    ap.add_argument("--window-post", type=int, default=3, help="Search window size after victim")
-    ap.add_argument("--max-block-gap", type=int, default=2, help="Max block gap between A1 and A2")
-    ap.add_argument("--min-victim-base-raw", type=int, default=0, help="Min victim base size (raw)")
-    ap.add_argument("--min-block", type=int, default=None, help="Min block number to scan")
-    ap.add_argument("--max-block", type=int, default=None, help="Max block number to scan")
+    ap.add_argument(
+        "--window-pre", type=int, default=3, help="Search window size before victim"
+    )
+    ap.add_argument(
+        "--window-post", type=int, default=3, help="Search window size after victim"
+    )
+    ap.add_argument(
+        "--max-block-gap", type=int, default=2, help="Max block gap between A1 and A2"
+    )
+    ap.add_argument(
+        "--min-victim-base-raw", type=int, default=0, help="Min victim base size (raw)"
+    )
+    ap.add_argument(
+        "--min-block", type=int, default=None, help="Min block number to scan"
+    )
+    ap.add_argument(
+        "--max-block", type=int, default=None, help="Max block number to scan"
+    )
     return ap
 
 

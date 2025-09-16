@@ -36,13 +36,25 @@ class WrappedNativeToken(TimestampMixin, Base):
 
     __table_args__ = (
         UniqueConstraint("chain_id", name="uq_wrapped_native_tokens_chain"),
-        Index("idx_wrapped_native_tokens_chain_v2_pool", "chain_id", "usd_uniswap_v2_pool_id"),
-        Index("idx_wrapped_native_tokens_chain_v3_pool", "chain_id", "usd_uniswap_v3_pool_id"),
+        Index(
+            "idx_wrapped_native_tokens_chain_v2_pool",
+            "chain_id",
+            "usd_uniswap_v2_pool_id",
+        ),
+        Index(
+            "idx_wrapped_native_tokens_chain_v3_pool",
+            "chain_id",
+            "usd_uniswap_v3_pool_id",
+        ),
     )
 
     # relations
     chain: Mapped["Chain"] = relationship("Chain")
     token: Mapped["Token"] = relationship("Token")
-    usd_uniswap_v2_pool: Mapped["DefiPool"] = relationship("DefiPool", foreign_keys="[WrappedNativeToken.usd_uniswap_v2_pool_id]")
-    usd_uniswap_v3_pool: Mapped["DefiPool"] = relationship("DefiPool", foreign_keys="[WrappedNativeToken.usd_uniswap_v3_pool_id]")
+    usd_uniswap_v2_pool: Mapped["DefiPool"] = relationship(
+        "DefiPool", foreign_keys="[WrappedNativeToken.usd_uniswap_v2_pool_id]"
+    )
+    usd_uniswap_v3_pool: Mapped["DefiPool"] = relationship(
+        "DefiPool", foreign_keys="[WrappedNativeToken.usd_uniswap_v3_pool_id]"
+    )
     usd_stable_coin: Mapped["UsdStableCoin"] = relationship("UsdStableCoin")

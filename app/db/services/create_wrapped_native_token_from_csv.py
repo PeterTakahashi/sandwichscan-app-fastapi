@@ -29,7 +29,9 @@ async def resolve_token_id(session, chain_id: int, address: str) -> Optional[int
     return row.scalar_one_or_none()
 
 
-async def resolve_usd_stable_coin_id(session, chain_id: int, token_id: int) -> Optional[int]:
+async def resolve_usd_stable_coin_id(
+    session, chain_id: int, token_id: int
+) -> Optional[int]:
     row = await session.execute(
         select(UsdStableCoin.id).where(
             and_(UsdStableCoin.chain_id == chain_id, UsdStableCoin.token_id == token_id)
@@ -56,12 +58,22 @@ async def resolve_uniswap_pool_id(
                 DefiPool.chain_id == chain_id,
                 DefiVersion.name == version_name,
                 or_(
-                    and_(DefiPool.token0_id == token_a_id, DefiPool.token1_id == token_b_id),
-                    and_(DefiPool.token0_id == token_b_id, DefiPool.token1_id == token_a_id),
+                    and_(
+                        DefiPool.token0_id == token_a_id,
+                        DefiPool.token1_id == token_b_id,
+                    ),
+                    and_(
+                        DefiPool.token0_id == token_b_id,
+                        DefiPool.token1_id == token_a_id,
+                    ),
                 ),
             )
         )
-        .order_by(desc(DefiPool.is_active), desc(DefiPool.last_swap_block), desc(DefiPool.created_block_number))
+        .order_by(
+            desc(DefiPool.is_active),
+            desc(DefiPool.last_swap_block),
+            desc(DefiPool.created_block_number),
+        )
         .limit(1)
     )
     row = await session.execute(stmt)
@@ -120,12 +132,16 @@ async def run(csv_path: str) -> None:
                 if stable_token_id is None:
                     print(f"[skip] stable token not found: {chain_name} {stable_addr}")
                     continue
-                wrapped_token_id = await resolve_token_id(session, chain_id, native_addr)
+                wrapped_token_id = await resolve_token_id(
+                    session, chain_id, native_addr
+                )
                 if wrapped_token_id is None:
                     print(f"[skip] wrapped token not found: {chain_name} {native_addr}")
                     continue
 
-                usd_sc_id = await resolve_usd_stable_coin_id(session, chain_id, stable_token_id)
+                usd_sc_id = await resolve_usd_stable_coin_id(
+                    session, chain_id, stable_token_id
+                )
 
                 v3_pool_id = await resolve_uniswap_pool_id(
                     session,
@@ -157,7 +173,9 @@ async def run(csv_path: str) -> None:
 
 
 def main():
-    ap = argparse.ArgumentParser(description="Create/Update wrapped_native_tokens from CSV")
+    ap = argparse.ArgumentParser(
+        description="Create/Update wrapped_native_tokens from CSV"
+    )
     ap.add_argument(
         "--csv",
         default="app/db/data/wrapped_native_tokens.csv",
