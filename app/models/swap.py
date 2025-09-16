@@ -72,4 +72,16 @@ class Swap(TimestampMixin, Base):
         UniqueConstraint("transaction_id", "log_index", name="uq_swaps_tx_log_index"),
         Index("idx_swaps_sender", "chain_id", "sender"),
         Index("idx_swaps_recipient", "chain_id", "recipient"),
+        Index(
+            "idx_swaps_pool_sell_buy",
+            "defi_pool_id",
+            "sell_token_id",
+            "buy_token_id",
+        ),
+        Index(
+            "idx_swaps_pool_tx_log",
+            "defi_pool_id",
+            "transaction_id",
+            "log_index",
+        ),
     )
