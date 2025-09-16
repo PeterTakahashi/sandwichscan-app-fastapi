@@ -39,13 +39,13 @@ class SandwichAttack(TimestampMixin, Base):
         ForeignKey("tokens.id", ondelete="SET NULL"), nullable=True, index=True
     )
 
-    revenue_base_raw: Mapped[int] = mapped_column(Numeric(78, 0), nullable=True)
+    revenue_base_raw: Mapped[int] = mapped_column(Numeric(78, 0), nullable=False, default=0)
     gas_fee_wei_attacker: Mapped[int] = mapped_column(
-        Numeric(78, 0), nullable=True
+        Numeric(78, 0), nullable=False, default=0
     )
-    profit_base_raw: Mapped[int] = mapped_column(Numeric(78, 0), nullable=True)
+    profit_base_raw: Mapped[int] = mapped_column(Numeric(78, 0), nullable=False, default=0)
     harm_base_raw: Mapped[int] = mapped_column(
-        Numeric(78, 0), nullable=True
+        Numeric(78, 0), nullable=False, default=0
     )
 
     revenue_usd: Mapped[float | None] = mapped_column(Numeric(38, 18), nullable=True)
