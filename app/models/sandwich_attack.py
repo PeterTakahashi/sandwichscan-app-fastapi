@@ -44,25 +44,11 @@ class SandwichAttack(TimestampMixin, Base):
         Numeric(78, 0), nullable=True
     )
     profit_base_raw: Mapped[int | None] = mapped_column(Numeric(78, 0), nullable=True)
-    profit_base: Mapped[float | None] = mapped_column(Numeric(38, 18), nullable=True)
     harm_base_raw: Mapped[int | None] = mapped_column(Numeric(78, 0), nullable=True)
-    harm_base: Mapped[float | None] = mapped_column(Numeric(38, 18), nullable=True)
 
     # ガス（攻撃者負担/全体）
     gas_fee_wei_attacker: Mapped[int | None] = mapped_column(
         Numeric(78, 0), nullable=True
-    )
-    gas_fee_eth_attacker: Mapped[float | None] = mapped_column(
-        Numeric(38, 18), nullable=True
-    )
-    gas_fee_usd_attacker: Mapped[float | None] = mapped_column(
-        Numeric(38, 18), nullable=True
-    )
-    gas_fee_eth_total: Mapped[float | None] = mapped_column(
-        Numeric(38, 18), nullable=True
-    )
-    gas_fee_usd_total: Mapped[float | None] = mapped_column(
-        Numeric(38, 18), nullable=True
     )
 
     revenue_usd: Mapped[float | None] = mapped_column(Numeric(38, 18), nullable=True)
