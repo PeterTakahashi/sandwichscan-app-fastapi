@@ -50,7 +50,9 @@ def price_base_per_stable(
     """
     p1_per_0: Decimal | None = None
     if sqrt_price_x96 is not None:
-        p1_per_0 = price1_per_0_from_sqrt_price_x96(sqrt_price_x96, decimals0, decimals1)
+        p1_per_0 = price1_per_0_from_sqrt_price_x96(
+            sqrt_price_x96, decimals0, decimals1
+        )
     elif tick is not None:
         p1_per_0 = price1_per_0_from_tick(tick, decimals0, decimals1)
     else:
@@ -64,4 +66,3 @@ def price_base_per_stable(
         if p1_per_0 == 0:
             return None
         return Decimal(1) / p1_per_0
-

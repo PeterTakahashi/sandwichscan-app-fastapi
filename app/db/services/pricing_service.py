@@ -14,7 +14,10 @@ from app.models.chain import Chain
 from app.models.transaction import Transaction
 from app.models.defi_pool import DefiPool
 from app.models.wrapped_native_token import WrappedNativeToken
-from app.lib.utils.uniswap_v3_price import price_base_per_stable, price1_per_0_from_sqrt_price_x96
+from app.lib.utils.uniswap_v3_price import (
+    price_base_per_stable,
+    price1_per_0_from_sqrt_price_x96,
+)
 
 
 async def _latest_swap_at_or_before(
@@ -23,7 +26,9 @@ async def _latest_swap_at_or_before(
     stmt = (
         select(Swap, Transaction.block_number)
         .join(Transaction, Transaction.id == Swap.transaction_id)
-        .where(and_(Swap.defi_pool_id == pool_id, Transaction.block_number <= block_number))
+        .where(
+            and_(Swap.defi_pool_id == pool_id, Transaction.block_number <= block_number)
+        )
         .order_by(desc(Transaction.block_number), desc(Swap.log_index))
         .limit(1)
     )
@@ -109,22 +114,30 @@ async def get_ethusd_from_uniswap_v3(
         return None
 
     # 1) try from DB swaps (tick/sqrtPrice)
-    res = await _latest_swap_at_or_before(session, pool_id=v3_pool_id, block_number=block_number)
+    res = await _latest_swap_at_or_before(
+        session, pool_id=v3_pool_id, block_number=block_number
+    )
     if res is not None:
         sw, priced_block_number = res
         prow = await session.execute(select(DefiPool).where(DefiPool.id == v3_pool_id))
         pool = prow.scalars().first()
         if pool is None:
             return None
-        decs = await session.execute(select(Token.id, Token.decimals).where(Token.id.in_([pool.token0_id, pool.token1_id])))
+        decs = await session.execute(
+            select(Token.id, Token.decimals).where(
+                Token.id.in_([pool.token0_id, pool.token1_id])
+            )
+        )
         dec_map = {int(r[0]): int(r[1]) for r in decs.all()}
-        base_is_token0 = (pool.token0_id == wrapped_token_id)
+        base_is_token0 = pool.token0_id == wrapped_token_id
         price = price_base_per_stable(
             base_is_token0=base_is_token0,
             decimals0=dec_map.get(pool.token0_id, 18),
             decimals1=dec_map.get(pool.token1_id, 18),
             tick=int(sw.tick) if sw.tick is not None else None,
-            sqrt_price_x96=int(sw.sqrt_price_x96) if sw.sqrt_price_x96 is not None else None,
+            sqrt_price_x96=(
+                int(sw.sqrt_price_x96) if sw.sqrt_price_x96 is not None else None
+            ),
         )
         if price is not None:
             return price, v3_pool_id, priced_block_number
@@ -140,22 +153,34 @@ async def get_ethusd_from_uniswap_v3(
     if pool is None:
         return None
     # determine stable token id and decimals
-    stable_token_id = pool.token1_id if pool.token0_id == wrapped_token_id else pool.token0_id
-    sdec_row = await session.execute(select(Token.decimals).where(Token.id == stable_token_id))
+    stable_token_id = (
+        pool.token1_id if pool.token0_id == wrapped_token_id else pool.token0_id
+    )
+    sdec_row = await session.execute(
+        select(Token.decimals).where(Token.id == stable_token_id)
+    )
     stable_decimals = int(sdec_row.scalar_one_or_none() or 6)
     w3 = Web3(Web3.HTTPProvider(rpc_url))
-    c = w3.eth.contract(address=Web3.to_checksum_address(pool.address), abi=UNISWAP_V3_POOL_ABI)
+    c = w3.eth.contract(
+        address=Web3.to_checksum_address(pool.address), abi=UNISWAP_V3_POOL_ABI
+    )
     try:
         slot0 = c.functions.slot0().call(block_identifier=block_number)
         sqrt_price_x96 = int(slot0[0])
     except Exception:
         return None
     wrapped_decimals = 18
-    p1_per_0 = price1_per_0_from_sqrt_price_x96(sqrt_price_x96, wrapped_decimals, stable_decimals)
+    p1_per_0 = price1_per_0_from_sqrt_price_x96(
+        sqrt_price_x96, wrapped_decimals, stable_decimals
+    )
     # decide ordering by address
-    waddr_row = await session.execute(select(Token.address).where(Token.id == wrapped_token_id))
+    waddr_row = await session.execute(
+        select(Token.address).where(Token.id == wrapped_token_id)
+    )
     wadd = waddr_row.scalar_one()
-    saddr_row = await session.execute(select(Token.address).where(Token.id == stable_token_id))
+    saddr_row = await session.execute(
+        select(Token.address).where(Token.id == stable_token_id)
+    )
     sadd = saddr_row.scalar_one()
     if Web3.to_checksum_address(wadd) < Web3.to_checksum_address(sadd):
         eth_usd = p1_per_0
@@ -199,21 +224,31 @@ async def get_ethusd_from_uniswap_v2(
     if pool is None:
         return None
     # stable token decimals
-    stable_token_id = pool.token1_id if pool.token0_id == wrapped_token_id else pool.token0_id
-    sdec_row = await session.execute(select(Token.decimals).where(Token.id == stable_token_id))
+    stable_token_id = (
+        pool.token1_id if pool.token0_id == wrapped_token_id else pool.token0_id
+    )
+    sdec_row = await session.execute(
+        select(Token.decimals).where(Token.id == stable_token_id)
+    )
     stable_decimals = int(sdec_row.scalar_one_or_none() or 6)
 
     w3 = Web3(Web3.HTTPProvider(rpc_url))
-    pair = w3.eth.contract(address=Web3.to_checksum_address(pool.address), abi=UNISWAP_V2_PAIR_ABI)
+    pair = w3.eth.contract(
+        address=Web3.to_checksum_address(pool.address), abi=UNISWAP_V2_PAIR_ABI
+    )
     try:
-        reserve0, reserve1, _ = pair.functions.getReserves().call(block_identifier=block_number)
+        reserve0, reserve1, _ = pair.functions.getReserves().call(
+            block_identifier=block_number
+        )
         t0 = pair.functions.token0().call(block_identifier=block_number)
-        t1 = pair.functions.token1().call(block_identifier=block_number)
+        pair.functions.token1().call(block_identifier=block_number)
     except Exception:
         return None
     wrapped_decimals = 18
     # pick wrapped address
-    waddr_row = await session.execute(select(Token.address).where(Token.id == wrapped_token_id))
+    waddr_row = await session.execute(
+        select(Token.address).where(Token.id == wrapped_token_id)
+    )
     wadd = waddr_row.scalar_one()
     if Web3.to_checksum_address(t0) == Web3.to_checksum_address(wadd):
         num = Decimal(reserve1) / (Decimal(10) ** stable_decimals)
@@ -230,10 +265,14 @@ async def get_ethusd_from_uniswap_v2(
 async def get_ethusd_onchain(
     session: AsyncSession, chain_id: int, block_number: int
 ) -> Optional[tuple[Decimal, int, int]]:
-    v3 = await get_ethusd_from_uniswap_v3(session, chain_id=chain_id, block_number=block_number)
+    v3 = await get_ethusd_from_uniswap_v3(
+        session, chain_id=chain_id, block_number=block_number
+    )
     if v3 is not None:
         return v3
-    return await get_ethusd_from_uniswap_v2(session, chain_id=chain_id, block_number=block_number)
+    return await get_ethusd_from_uniswap_v2(
+        session, chain_id=chain_id, block_number=block_number
+    )
 
 
 WEI_PER_ETH = Decimal(10) ** 18
@@ -273,12 +312,16 @@ async def update_transaction_gas_price_usd(
     if gas_price_wei is None:
         return False
 
-    priced = await get_ethusd_onchain(session, chain_id=int(chain_id), block_number=int(block_number))
+    priced = await get_ethusd_onchain(
+        session, chain_id=int(chain_id), block_number=int(block_number)
+    )
     if priced is None:
         return False
     eth_usd, _pool_id, _blk = priced
 
-    gas_cost_usd = (Decimal(int(gas_used)) * Decimal(int(gas_price_wei)) / WEI_PER_ETH) * eth_usd
+    gas_cost_usd = (
+        Decimal(int(gas_used)) * Decimal(int(gas_price_wei)) / WEI_PER_ETH
+    ) * eth_usd
 
     from sqlalchemy import update
 
@@ -306,10 +349,11 @@ async def update_swap_gas_price_usd(
         select(
             Swap.id,
             Swap.transaction_id,
-        )
-        .where(Swap.id == swap_id)
+        ).where(Swap.id == swap_id)
     )
     swap = swaps.first()
     if not swap:
         return False
-    return await update_transaction_gas_price_usd(session, transaction_id=int(swap.transaction_id))
+    return await update_transaction_gas_price_usd(
+        session, transaction_id=int(swap.transaction_id)
+    )
