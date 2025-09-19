@@ -40,7 +40,7 @@ class SandwichAttack(TimestampMixin, Base):
     )
     defi_version_id: Mapped[int] = mapped_column(
         ForeignKey("defi_versions.id", ondelete="CASCADE"),
-        nullable=True,
+        nullable=False,
         index=True,
     )
 
