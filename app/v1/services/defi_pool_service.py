@@ -28,7 +28,7 @@ class DefiPoolService:
                 DefiPool.chain,
                 DefiPool.token0,
                 DefiPool.token1,
-                (DefiPool.defi_factory, DefiFactory.defi_version, DefiVersion.defi)
+                (DefiPool.defi_factory, DefiFactory.defi_version, DefiVersion.defi),
             ],  # Eager load relationships
         )
         total_count = await self.defi_pool_repository.count(
@@ -37,8 +37,6 @@ class DefiPoolService:
                 exclude={"limit", "offset", "sorted_by", "sorted_order"},
             ),
         )
-        defi_pool = defi_pools[0]
-        print(defi_pool.defi_factory.defi_version.name)
         return DefiPoolListRead(
             meta=ListResponseMeta(
                 total_count=total_count,

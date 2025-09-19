@@ -1,7 +1,6 @@
 from datetime import datetime
 from pydantic import Field, ConfigDict
 from app.v1.schemas.common.id_encoder import HasEncodedID
-from app.v1.schemas.chain.read import ChainRead
 from app.v1.schemas.defi_version.read import DefiVersionRead
 
 

@@ -92,7 +92,9 @@ class Swap(TimestampMixin, Base):
     # relationships
     chain: Mapped["Chain"] = relationship("Chain", back_populates="swaps")
     defi_pool: Mapped["DefiPool"] = relationship("DefiPool", back_populates="swaps")
-    transaction: Mapped["Transaction"] = relationship("Transaction", back_populates="swaps")
+    transaction: Mapped["Transaction"] = relationship(
+        "Transaction", back_populates="swaps"
+    )
     sell_token: Mapped["Token"] = relationship(
         "Token", foreign_keys=[sell_token_id], back_populates="swaps_as_sell_token"
     )
@@ -103,17 +105,17 @@ class Swap(TimestampMixin, Base):
         "SandwichAttack",
         foreign_keys="[SandwichAttack.front_attack_swap_id]",
         back_populates="front_attack_swap",
-        cascade="all, delete-orphan"
+        cascade="all, delete-orphan",
     )
     victim_sandwich_attacks: Mapped[List["SandwichAttack"]] = relationship(
         "SandwichAttack",
         foreign_keys="[SandwichAttack.victim_swap_id]",
         back_populates="victim_swap",
-        cascade="all, delete-orphan"
+        cascade="all, delete-orphan",
     )
     back_sandwich_attacks: Mapped[List["SandwichAttack"]] = relationship(
         "SandwichAttack",
         foreign_keys="[SandwichAttack.back_attack_swap_id]",
         back_populates="back_attack_swap",
-        cascade="all, delete-orphan"
+        cascade="all, delete-orphan",
     )

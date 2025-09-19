@@ -1,0 +1,48 @@
+from typing import Optional
+from fastapi import Query
+from datetime import datetime
+from app.v1.schemas.sandwich_attack.search_params import (
+    SandwichAttackSearchParams,
+)
+
+
+def get_sandwich_attack_search_params(
+    limit: int = Query(10, ge=1, le=100),
+    offset: int = Query(0, ge=0),
+    sorted_by: str = Query("created_at"),
+    sorted_order: str = Query("desc"),
+    victim_address__exact: Optional[str] = Query(None),
+    attacker_address__exact: Optional[str] = Query(None),
+    revenue_base_raw__gte: Optional[int] = Query(None, ge=0),
+    revenue_base_raw__lte: Optional[int] = Query(None, ge=0),
+    profit_base_raw__gte: Optional[int] = Query(None, ge=0),
+    profit_base_raw__lte: Optional[int] = Query(None, ge=0),
+    harm_base_raw__gte: Optional[int] = Query(None, ge=0),
+    harm_base_raw__lte: Optional[int] = Query(None, ge=0),
+    gas_fee_wei_attacker__gte: Optional[int] = Query(None, ge=0),
+    gas_fee_wei_attacker__lte: Optional[int] = Query(None, ge=0),
+    created_at__gte: Optional[datetime] = Query(None),
+    created_at__lte: Optional[datetime] = Query(None),
+    updated_at__gte: Optional[datetime] = Query(None),
+    updated_at__lte: Optional[datetime] = Query(None),
+) -> SandwichAttackSearchParams:
+    return SandwichAttackSearchParams(
+        limit=limit,
+        offset=offset,
+        sorted_by=sorted_by,
+        sorted_order=sorted_order,
+        victim_address__exact=victim_address__exact,
+        attacker_address__exact=attacker_address__exact,
+        revenue_base_raw__gte=revenue_base_raw__gte,
+        revenue_base_raw__lte=revenue_base_raw__lte,
+        profit_base_raw__gte=profit_base_raw__gte,
+        profit_base_raw__lte=profit_base_raw__lte,
+        harm_base_raw__gte=harm_base_raw__gte,
+        harm_base_raw__lte=harm_base_raw__lte,
+        gas_fee_wei_attacker__gte=gas_fee_wei_attacker__gte,
+        gas_fee_wei_attacker__lte=gas_fee_wei_attacker__lte,
+        created_at__gte=created_at__gte,
+        created_at__lte=created_at__lte,
+        updated_at__gte=updated_at__gte,
+        updated_at__lte=updated_at__lte,
+    )
