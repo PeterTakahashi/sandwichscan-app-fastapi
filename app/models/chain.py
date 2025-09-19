@@ -34,6 +34,8 @@ class Chain(TimestampMixin, Base):
 
     rpc_url: Mapped[str] = mapped_column(String, nullable=False, default="")
 
+    explorer_url: Mapped[str] = mapped_column(String, nullable=False, default="")
+
     last_block_number: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     big_query_table_id: Mapped[str] = mapped_column(String, nullable=False, default="")
 
