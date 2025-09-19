@@ -871,15 +871,15 @@ wheels = [
 
 [[package]]
 name = "fastapi-repository"
-version = "0.0.4"
+version = "0.0.5"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "fastapi" },
     { name = "sqlalchemy" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/42/87/566b1cc0e7792a57cb9d2203b2b02ff145e1b42e7cd29a06f7037bde4c71/fastapi_repository-0.0.4.tar.gz", hash = "sha256:92a9bd0ce6bb2d033eb18814b217ac0b69a261b89b935b10736c4ee516f3516b", size = 6005, upload-time = "2025-06-29T16:14:15.278Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/9f/5e/72e7c014ba6e86943a6751a4f5c13176a728dcaddeb117841013adf40d32/fastapi_repository-0.0.5.tar.gz", hash = "sha256:6092a9c1f2c0c12d0077f1402216d3bed57c79859345565b57502be2de88503b", size = 6964, upload-time = "2025-09-19T08:00:28.401Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/e9/f5/4d9a24e9d0493b4709f697d87d8e8ab13a833c74dfccbf1bc348828a391e/fastapi_repository-0.0.4-py3-none-any.whl", hash = "sha256:7d453a7e82e01e3383a083cdc5c60e9dfbac2e0c7f4e62db278e58789ccff63b", size = 4874, upload-time = "2025-06-29T16:14:13.967Z" },
+    { url = "https://files.pythonhosted.org/packages/70/97/94b548e27b557bed9039da1c145bda5626c0203ced30b5995b5dea5f9e07/fastapi_repository-0.0.5-py3-none-any.whl", hash = "sha256:9cceac9a0117320617db90199fefae887f5a456c414ca0f5485ab70e1c1ae9a4", size = 5764, upload-time = "2025-09-19T08:00:27.408Z" },
 ]
 
 [[package]]
@@ -2257,7 +2257,7 @@ requires-dist = [
     { name = "eth-abi", specifier = ">=5.2.0" },
     { name = "factory-boy", specifier = ">=3.3.3" },
     { name = "fastapi", specifier = ">=0.115.12" },
-    { name = "fastapi-repository", specifier = ">=0.0.4" },
+    { name = "fastapi-repository", specifier = ">=0.0.5" },
     { name = "google-cloud-bigquery", specifier = ">=3.37.0" },
     { name = "hashids", specifier = ">=1.3.1" },
     { name = "httpx", specifier = "==0.28.1" },

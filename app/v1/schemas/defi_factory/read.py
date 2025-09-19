@@ -11,7 +11,6 @@ class DefiFactoryRead(HasEncodedID):
         ..., description="The block number when the DeFi factory was created."
     )
 
-    chain: ChainRead = Field(..., description="The chain this DeFi factory belongs to.")
     defi_version: DefiVersionRead = Field(
         ..., description="The DeFi version this factory is associated with."
     )
