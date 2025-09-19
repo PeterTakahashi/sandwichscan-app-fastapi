@@ -5,6 +5,7 @@ from app.v1.schemas.common.id_encoder import HasEncodedID
 from app.v1.schemas.chain.read import ChainRead
 from app.v1.schemas.sandwich_attack.swap.read import SwapRead
 from app.v1.schemas.token.read import TokenRead
+from app.v1.schemas.defi_version.read import DefiVersionRead
 
 
 class SandwichAttackRead(HasEncodedID):
@@ -24,6 +25,10 @@ class SandwichAttackRead(HasEncodedID):
 
     base_token: TokenRead | None = Field(
         None, description="The base token of the sandwich attack."
+    )
+
+    defi_version: DefiVersionRead = Field(
+        ..., description="The DeFi version associated with the sandwich attack."
     )
 
     revenue_base_raw: int = Field(

@@ -8,6 +8,7 @@ from app.repositories.sandwich_attack_repository import SandwichAttackRepository
 from app.v1.schemas.common.list.base_list_response import ListResponseMeta
 from app.models.sandwich_attack import SandwichAttack
 from app.models.swap import Swap
+from app.models.defi_version import DefiVersion
 
 
 class SandwichAttackService:
@@ -37,6 +38,7 @@ class SandwichAttackService:
                 (SandwichAttack.back_attack_swap, Swap.buy_token),
                 (SandwichAttack.back_attack_swap, Swap.transaction),
                 SandwichAttack.base_token,
+                (SandwichAttack.defi_version, DefiVersion.defi),
             ],  # Eager load relationships
         )
         total_count = await self.sandwich_attack_repository.count(

@@ -6,6 +6,7 @@ from app.dependencies.repositories.sandwich_attack_repository import (
     get_sandwich_attack_repository,
 )
 from app.models.swap import Swap
+from app.models.defi_version import DefiVersion
 
 
 async def get_sandwich_attack_by_id(
@@ -28,6 +29,7 @@ async def get_sandwich_attack_by_id(
             (SandwichAttack.back_attack_swap, Swap.buy_token),
             (SandwichAttack.back_attack_swap, Swap.transaction),
             SandwichAttack.base_token,
+            (SandwichAttack.defi_version, DefiVersion.defi),
         ],  # Eager load relationships
     )
     return sandwich_attack
