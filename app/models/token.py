@@ -42,6 +42,7 @@ class Token(TimestampMixin, Base):
     decimals_invalid: Mapped[bool] = mapped_column(
         Boolean, nullable=False, default=False
     )
+    logo_url: Mapped[str] = mapped_column(String, nullable=True)
 
     __table_args__ = (
         UniqueConstraint("chain_id", "address", name="uq_tokens_chain_address"),

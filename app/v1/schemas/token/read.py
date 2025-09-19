@@ -13,6 +13,7 @@ class TokenRead(HasEncodedID):
     decimals_invalid: bool = Field(
         ..., description="Indicates if the token decimals are invalid."
     )
+    logo_url: str | None = Field(None, description="URL of the token logo.")
     chain: ChainRead = Field(..., description="The chain this token belongs to.")
 
     created_at: datetime = Field(..., description="Record creation timestamp.")

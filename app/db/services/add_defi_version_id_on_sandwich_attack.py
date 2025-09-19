@@ -7,26 +7,35 @@ from app.models.defi_pool import DefiPool
 from app.models.defi_factory import DefiFactory
 from app.db.session import async_session_maker
 
+
 async def add_defi_version_id_on_sandwich_attack(session: AsyncSession):
     sandwich_attack_repo = SandwichAttackRepository(session)
 
     sandwich_attacks = await sandwich_attack_repo.where(
         limit=13306,
         joinedload_models=[
-            (SandwichAttack.front_attack_swap, Swap.defi_pool, DefiPool.defi_factory, DefiFactory.defi_version),
-        ])
+            (
+                SandwichAttack.front_attack_swap,
+                Swap.defi_pool,
+                DefiPool.defi_factory,
+                DefiFactory.defi_version,
+            ),
+        ],
+    )
 
     for sa in sandwich_attacks:
-         await sandwich_attack_repo.update(
+        await sandwich_attack_repo.update(
             id=sa.id,
-            defi_version_id=sa.front_attack_swap.defi_pool.defi_factory.defi_version_id
-         )
+            defi_version_id=sa.front_attack_swap.defi_pool.defi_factory.defi_version_id,
+        )
 
     await session.commit()
+
 
 async def _main():
     async with async_session_maker() as db_session:
         await add_defi_version_id_on_sandwich_attack(db_session)
+
 
 if __name__ == "__main__":
     asyncio.run(_main())
