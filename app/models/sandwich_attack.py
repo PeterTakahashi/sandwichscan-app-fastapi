@@ -9,6 +9,7 @@ if TYPE_CHECKING:
     from app.models.chain import Chain
     from app.models.swap import Swap
     from app.models.token import Token
+    from app.models.defi_version import DefiVersion
 
 
 class SandwichAttack(TimestampMixin, Base):
@@ -35,6 +36,11 @@ class SandwichAttack(TimestampMixin, Base):
     back_attack_swap_id: Mapped[int] = mapped_column(
         ForeignKey("swaps.id", ondelete="CASCADE"),
         nullable=False,
+        index=True,
+    )
+    defi_version_id: Mapped[int] = mapped_column(
+        ForeignKey("defi_versions.id", ondelete="CASCADE"),
+        nullable=True,
         index=True,
     )
 
@@ -92,4 +98,7 @@ class SandwichAttack(TimestampMixin, Base):
     )
     base_token: Mapped["Token"] = relationship(
         "Token", back_populates="sandwich_attacks"
+    )
+    defi_version: Mapped["DefiVersion"] = relationship(
+        "DefiVersion", back_populates="sandwich_attacks"
     )

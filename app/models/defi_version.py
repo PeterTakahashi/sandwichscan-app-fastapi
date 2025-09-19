@@ -9,6 +9,7 @@ from typing import List
 if TYPE_CHECKING:
     from app.models.defi_factory import DefiFactory
     from app.models.defi import Defi
+    from app.models.sandwich_attack import SandwichAttack
 
 
 class DefiVersion(TimestampMixin, Base):
@@ -29,3 +30,6 @@ class DefiVersion(TimestampMixin, Base):
         "DefiFactory", back_populates="defi_version", cascade="all, delete-orphan"
     )
     defi: Mapped["Defi"] = relationship("Defi", back_populates="defi_versions")
+    sandwich_attacks: Mapped[List["SandwichAttack"]] = relationship(
+        "SandwichAttack", back_populates="defi_version"
+    )
