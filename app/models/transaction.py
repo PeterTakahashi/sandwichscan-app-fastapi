@@ -1,12 +1,14 @@
+from typing import TYPE_CHECKING, List
 from app.db.base import Base
 from sqlalchemy import String, Integer, BigInteger, SmallInteger, Numeric
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.models.mixin.timestamp import TimestampMixin
 from sqlalchemy import ForeignKey, UniqueConstraint, Index
-from typing import TYPE_CHECKING
+
 
 if TYPE_CHECKING:
     from app.models.chain import Chain
+    from app.models.swap import Swap
 
 
 class Transaction(TimestampMixin, Base):
@@ -52,3 +54,6 @@ class Transaction(TimestampMixin, Base):
     )
 
     chain: Mapped["Chain"] = relationship("Chain", back_populates="transactions")
+    swaps: Mapped[List["Swap"]] = relationship(
+        "Swap", back_populates="transaction", cascade="all, delete-orphan"
+    )

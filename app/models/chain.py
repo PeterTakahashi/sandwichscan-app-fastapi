@@ -1,9 +1,9 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 from app.db.base import Base
 from sqlalchemy import Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.models.mixin.timestamp import TimestampMixin
-from typing import List
+
 
 if TYPE_CHECKING:
     from app.models.defi_factory import DefiFactory
@@ -11,6 +11,8 @@ if TYPE_CHECKING:
     from app.models.token import Token
     from app.models.transaction import Transaction
     from app.models.usd_stable_coin import UsdStableCoin
+    from app.models.swap import Swap
+    from app.models.sandwich_attack import SandwichAttack
 
 
 class Chain(TimestampMixin, Base):
@@ -58,4 +60,10 @@ class Chain(TimestampMixin, Base):
         primaryjoin="Chain.id==UsdStableCoin.chain_id",
         secondaryjoin="Token.id==UsdStableCoin.token_id",
         viewonly=True,
+    )
+    swaps: Mapped[List["Swap"]] = relationship(
+        "Swap", back_populates="chain", cascade="all, delete-orphan"
+    )
+    sandwich_attacks: Mapped[List["SandwichAttack"]] = relationship(
+        "SandwichAttack", back_populates="chain", cascade="all, delete-orphan"
     )

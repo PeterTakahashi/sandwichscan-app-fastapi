@@ -11,6 +11,7 @@ if TYPE_CHECKING:
     from app.models.defi_version import DefiVersion
     from app.models.chain import Chain
     from app.models.token import Token
+    from app.models.swap import Swap
 
 
 class DefiPool(TimestampMixin, Base):
@@ -68,4 +69,7 @@ class DefiPool(TimestampMixin, Base):
     )
     token1: Mapped["Token"] = relationship(
         "Token", foreign_keys=[token1_id], back_populates="defi_pools_token1"
+    )
+    swaps: Mapped[list["Swap"]] = relationship(
+        "Swap", back_populates="defi_pool", cascade="all, delete-orphan"
     )

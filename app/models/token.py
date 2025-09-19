@@ -1,7 +1,4 @@
 from typing import TYPE_CHECKING, List
-from app.db.base import Base
-from sqlalchemy.orm import Mapped, mapped_column, relationship
-from app.models.mixin.timestamp import TimestampMixin
 from sqlalchemy import (
     ForeignKey,
     Enum as SQLAlchemyEnum,
@@ -9,12 +6,17 @@ from sqlalchemy import (
     UniqueConstraint,
     Boolean,
 )
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from app.db.base import Base
+from app.models.mixin.timestamp import TimestampMixin
 from app.models.enums.token import TokenType
 
 
 if TYPE_CHECKING:
     from app.models.chain import Chain
     from app.models.defi_pool import DefiPool
+    from app.models.swap import Swap
+    from app.models.sandwich_attack import SandwichAttack
 
 
 class Token(TimestampMixin, Base):
@@ -50,4 +52,19 @@ class Token(TimestampMixin, Base):
     )
     defi_pools_token1: Mapped[List["DefiPool"]] = relationship(
         "DefiPool", foreign_keys="[DefiPool.token1_id]", back_populates="token1"
+    )
+    swaps_as_sell_token: Mapped[List["Swap"]] = relationship(
+        "Swap",
+        foreign_keys="[Swap.sell_token_id]",
+        back_populates="sell_token",
+        cascade="all, delete-orphan",
+    )
+    swaps_as_buy_token: Mapped[List["Swap"]] = relationship(
+        "Swap",
+        foreign_keys="[Swap.buy_token_id]",
+        back_populates="buy_token",
+        cascade="all, delete-orphan",
+    )
+    sandwich_attacks: Mapped[List["SandwichAttack"]] = relationship(
+        "SandwichAttack", back_populates="base_token", cascade="all, delete-orphan"
     )

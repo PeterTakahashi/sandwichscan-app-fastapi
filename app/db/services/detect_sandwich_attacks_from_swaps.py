@@ -600,7 +600,7 @@ SELECT * FROM victims
     return inserted
 
 
-CHAIN_ID = 1  # Ethereum Mainnet
+CHAIN_ID = 4  # Polygon
 
 
 async def detect_and_insert_for_v2_pools(session: AsyncSession):
