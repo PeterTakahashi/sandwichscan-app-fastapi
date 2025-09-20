@@ -7,6 +7,7 @@ from app.v1.schemas.common.validators import decode_hashid_list
 
 class SandwichAttackSearchParams(BaseSearchParams):
     chain_id__in: Optional[List[int]] = None
+    victim_address__exact__or__attacker_address__exact: Optional[str] = None
     victim_address__exact: Optional[str] = None
     attacker_address__exact: Optional[str] = None
     revenue_base_raw__gte: Optional[int] = None
