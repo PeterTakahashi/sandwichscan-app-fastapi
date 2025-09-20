@@ -9,8 +9,9 @@ from app.v1.schemas.sandwich_attack.search_params import (
 def get_sandwich_attack_search_params(
     limit: int = Query(10, ge=1, le=100),
     offset: int = Query(0, ge=0),
-    sorted_by: str = Query("created_at"),
+    sorted_by: str = Query("front_attack_swap__transaction__block_timestamp"),
     sorted_order: str = Query("desc"),
+    chain_id__in: Optional[list[str]] = Query(None),
     victim_address__exact: Optional[str] = Query(None),
     attacker_address__exact: Optional[str] = Query(None),
     revenue_base_raw__gte: Optional[int] = Query(None, ge=0),
@@ -31,6 +32,7 @@ def get_sandwich_attack_search_params(
         offset=offset,
         sorted_by=sorted_by,
         sorted_order=sorted_order,
+        chain_id__in=chain_id__in,
         victim_address__exact=victim_address__exact,
         attacker_address__exact=attacker_address__exact,
         revenue_base_raw__gte=revenue_base_raw__gte,

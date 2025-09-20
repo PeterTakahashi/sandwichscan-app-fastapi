@@ -10,6 +10,7 @@ if TYPE_CHECKING:
     from app.models.swap import Swap
     from app.models.token import Token
     from app.models.defi_version import DefiVersion
+    from app.models.defi_pool import DefiPool
 
 
 class SandwichAttack(TimestampMixin, Base):
@@ -21,6 +22,10 @@ class SandwichAttack(TimestampMixin, Base):
         ForeignKey("chains.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
+    )
+
+    defi_pool_id: Mapped[int | None] = mapped_column(
+        ForeignKey("defi_pools.id", ondelete="SET NULL"), nullable=False, index=True
     )
 
     front_attack_swap_id: Mapped[int] = mapped_column(
@@ -101,4 +106,7 @@ class SandwichAttack(TimestampMixin, Base):
     )
     defi_version: Mapped["DefiVersion"] = relationship(
         "DefiVersion", back_populates="sandwich_attacks"
+    )
+    defi_pool: Mapped["DefiPool"] = relationship(
+        "DefiPool", back_populates="sandwich_attacks"
     )

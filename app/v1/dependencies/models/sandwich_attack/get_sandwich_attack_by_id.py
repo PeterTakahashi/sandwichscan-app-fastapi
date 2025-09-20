@@ -19,6 +19,7 @@ async def get_sandwich_attack_by_id(
         id=decode_id(sandwich_attack_id),
         joinedload_models=[
             SandwichAttack.chain,
+            SandwichAttack.defi_pool,
             (SandwichAttack.front_attack_swap, Swap.sell_token),
             (SandwichAttack.front_attack_swap, Swap.buy_token),
             (SandwichAttack.front_attack_swap, Swap.transaction),

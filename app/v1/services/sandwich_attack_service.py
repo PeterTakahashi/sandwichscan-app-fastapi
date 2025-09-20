@@ -28,6 +28,7 @@ class SandwichAttackService:
             **search_params.model_dump(exclude_none=True),
             joinedload_models=[
                 SandwichAttack.chain,
+                SandwichAttack.defi_pool,
                 (SandwichAttack.front_attack_swap, Swap.sell_token),
                 (SandwichAttack.front_attack_swap, Swap.buy_token),
                 (SandwichAttack.front_attack_swap, Swap.transaction),

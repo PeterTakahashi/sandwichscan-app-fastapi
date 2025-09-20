@@ -12,6 +12,7 @@ if TYPE_CHECKING:
     from app.models.chain import Chain
     from app.models.token import Token
     from app.models.swap import Swap
+    from app.models.sandwich_attack import SandwichAttack
 
 
 class DefiPool(TimestampMixin, Base):
@@ -72,4 +73,7 @@ class DefiPool(TimestampMixin, Base):
     )
     swaps: Mapped[list["Swap"]] = relationship(
         "Swap", back_populates="defi_pool", cascade="all, delete-orphan"
+    )
+    sandwich_attacks: Mapped[list["SandwichAttack"]] = relationship(
+        "SandwichAttack", back_populates="defi_pool"
     )
