@@ -5,7 +5,7 @@ from app.models.swap import Swap
 from app.models.sandwich_attack import SandwichAttack
 from app.db.session import async_session_maker
 
-LIMIT = 13306
+LIMIT = 9999999
 
 
 async def update_usd_on_sandwich_attack(session: AsyncSession):

@@ -7,6 +7,7 @@ from app.v1.schemas.common.validators import decode_hashid_list
 
 class SandwichAttackSearchParams(BaseSearchParams):
     chain_id__in: Optional[List[int]] = None
+    defi_version_id__in: Optional[List[int]] = None
     victim_address__exact__or__attacker_address__exact: Optional[str] = None
     victim_address__exact: Optional[str] = None
     attacker_address__exact: Optional[str] = None
@@ -28,4 +29,11 @@ class SandwichAttackSearchParams(BaseSearchParams):
     @field_validator("chain_id__in", mode="before")
     @classmethod
     def _decode_ids(cls, values: Optional[List[str]]) -> Optional[list[int]]:
+        return decode_hashid_list(values)
+
+    @field_validator("defi_version_id__in", mode="before")
+    @classmethod
+    def _decode_defi_version_ids(
+        cls, values: Optional[List[str]]
+    ) -> Optional[list[int]]:
         return decode_hashid_list(values)
