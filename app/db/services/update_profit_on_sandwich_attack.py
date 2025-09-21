@@ -149,6 +149,7 @@ def gas_wei_to_base_raw(total_gas_wei: int, base_decimals: int, ethusd: Decimal)
     base = eth * ethusd * (Decimal(10) ** base_decimals)
     return int(base)  # 切り捨て
 
+
 def fetch_revenue_base_raw(sandwich_attack: SandwichAttack) -> int:
     front = sandwich_attack.front_attack_swap
     back = sandwich_attack.back_attack_swap
@@ -158,7 +159,9 @@ def fetch_revenue_base_raw(sandwich_attack: SandwichAttack) -> int:
 
     return max(back_amount_out_raw - front_amount_in_raw, 0)
 
+
 CHAIN_ID = 1  # mainnet
+
 
 async def update_harm_on_sandwich_attack(session: AsyncSession):
     sandwich_attack_repo = SandwichAttackRepository(session)

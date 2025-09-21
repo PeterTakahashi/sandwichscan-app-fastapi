@@ -240,7 +240,9 @@ SELECT * FROM victims
         )
         all_rows = rows.all()
         if not all_rows:
-            print(f"No candidate rows in blocks {win_min}..{win_max}, chain_id {pool.chain_id}")
+            print(
+                f"No candidate rows in blocks {win_min}..{win_max}, chain_id {pool.chain_id}"
+            )
             return 0
 
         # Filter to keep only those with front_block within core window
@@ -350,7 +352,7 @@ SELECT * FROM victims
                     front_attack_swap_id=front.id,
                     victim_swap_id=victim.id,
                     back_attack_swap_id=back.id,
-                    defi_version_id=1, # uniswap-v2
+                    defi_version_id=1,  # uniswap-v2
                     attacker_address=attacker_address,
                     victim_address=victim_address,
                     base_token_id=base_token_id,

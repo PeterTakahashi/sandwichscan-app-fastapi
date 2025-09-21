@@ -39,6 +39,7 @@ v1_app.add_exception_handler(NoResultFound, no_result_found_exception_handler)  
 
 v1_app.add_exception_handler(APIException, api_exception_handler)  # type: ignore
 
+
 @v1_app.get("/scalar", include_in_schema=False, response_class=HTMLResponse)
 async def scalar_docs():
     return get_scalar_api_reference(
