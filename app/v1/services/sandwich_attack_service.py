@@ -5,7 +5,9 @@ from app.v1.schemas.sandwich_attack import (
 )
 from app.repositories.sandwich_attack_repository import SandwichAttackRepository
 
-from app.v1.schemas.common.list.base_list_response import ListResponseMeta
+from app.v1.schemas.sandwich_attack.list_response_meta import (
+    SandwichAttackListResponseMeta,
+)
 from app.models.sandwich_attack import SandwichAttack
 from app.models.swap import Swap
 from app.models.defi_version import DefiVersion
@@ -24,7 +26,6 @@ class SandwichAttackService:
         """
         Retrieve a list of sandwich_attacks with filtering, sorting, and pagination.
         """
-        print(search_params)
         sandwich_attacks = await self.sandwich_attack_repository.where(
             **search_params.model_dump(exclude_none=True),
             joinedload_models=[
@@ -49,9 +50,33 @@ class SandwichAttackService:
                 exclude={"limit", "offset", "sorted_by", "sorted_order"},
             ),
         )
+        total_revenue_usd = await self.sandwich_attack_repository.sum(
+            "revenue_usd",
+            **search_params.model_dump(
+                exclude_none=True,
+                exclude={"limit", "offset", "sorted_by", "sorted_order"},
+            ),
+        )
+        total_profit_usd = await self.sandwich_attack_repository.sum(
+            "profit_usd",
+            **search_params.model_dump(
+                exclude_none=True,
+                exclude={"limit", "offset", "sorted_by", "sorted_order"},
+            ),
+        )
+        total_harm_usd = await self.sandwich_attack_repository.sum(
+            "harm_usd",
+            **search_params.model_dump(
+                exclude_none=True,
+                exclude={"limit", "offset", "sorted_by", "sorted_order"},
+            ),
+        )
         return SandwichAttackListRead(
-            meta=ListResponseMeta(
+            meta=SandwichAttackListResponseMeta(
                 total_count=total_count,
+                total_revenue_usd=total_revenue_usd,
+                total_profit_usd=total_profit_usd,
+                total_harm_usd=total_harm_usd,
                 **search_params.model_dump(exclude_none=True),
             ),
             data=[SandwichAttackRead.model_validate(tx) for tx in sandwich_attacks],
