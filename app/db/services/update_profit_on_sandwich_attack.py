@@ -149,12 +149,23 @@ def gas_wei_to_base_raw(total_gas_wei: int, base_decimals: int, ethusd: Decimal)
     base = eth * ethusd * (Decimal(10) ** base_decimals)
     return int(base)  # 切り捨て
 
+def fetch_revenue_base_raw(sandwich_attack: SandwichAttack) -> int:
+    front = sandwich_attack.front_attack_swap
+    back = sandwich_attack.back_attack_swap
+
+    front_amount_in_raw = front.amount0_in_raw + front.amount1_in_raw
+    back_amount_out_raw = back.amount0_out_raw + back.amount1_out_raw
+
+    return max(back_amount_out_raw - front_amount_in_raw, 0)
+
+CHAIN_ID = 1  # mainnet
 
 async def update_harm_on_sandwich_attack(session: AsyncSession):
     sandwich_attack_repo = SandwichAttackRepository(session)
 
     sandwich_attacks = await sandwich_attack_repo.where(
         limit=9999999,
+        chain_id=CHAIN_ID,
         joinedload_models=[
             (SandwichAttack.front_attack_swap, Swap.sell_token),
             (SandwichAttack.front_attack_swap, Swap.buy_token),
@@ -192,15 +203,18 @@ async def update_harm_on_sandwich_attack(session: AsyncSession):
         )  # USDCなら6
         gas_base_raw = gas_wei_to_base_raw(total_gas_wei, base_decimals, ethusd)
 
-        profit_base_raw = sandwich_attack.revenue_base_raw - gas_base_raw
+        revenue_base_raw = fetch_revenue_base_raw(sandwich_attack)
+        profit_base_raw = revenue_base_raw - gas_base_raw
 
         await sandwich_attack_repo.update(
             id=sandwich_attack.id,
             gas_fee_wei_attacker=total_gas_wei,
             profit_base_raw=profit_base_raw,
+            gas_fee_base_raw=gas_base_raw,
+            revenue_base_raw=revenue_base_raw,
         )
         print(
-            f"id: {sandwich_attack.id}, revenue: {sandwich_attack.revenue_base_raw}, gas_fee: {gas_base_raw}, profit: {profit_base_raw}"
+            f"id: {sandwich_attack.id}, revenue: {revenue_base_raw}, gas_fee: {gas_base_raw}, profit: {profit_base_raw}"
         )
 
 

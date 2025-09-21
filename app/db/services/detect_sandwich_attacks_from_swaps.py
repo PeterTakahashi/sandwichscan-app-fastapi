@@ -15,9 +15,6 @@ from app.models.usd_stable_coin import UsdStableCoin
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from app.models.sandwich_attack import SandwichAttack
 
-# from app.v1.services.sandwich_attack_service import (
-#     create_sandwich_attack_if_pricable,
-# )
 from app.db.session import async_session_maker
 import asyncio
 from decimal import Decimal, getcontext
@@ -243,6 +240,7 @@ SELECT * FROM victims
         )
         all_rows = rows.all()
         if not all_rows:
+            print(f"No candidate rows in blocks {win_min}..{win_max}, chain_id {pool.chain_id}")
             return 0
 
         # Filter to keep only those with front_block within core window
@@ -338,29 +336,21 @@ SELECT * FROM victims
             if base_in <= 0 or base_out <= 0 or q_front <= 0 or q_back <= 0:
                 continue
 
-            r_back = base_out / q_back
-            r_front = q_front / base_in
-            pair_q = q_front if q_front <= q_back else q_back
-
-            # Net trading P&L in base token for the matched portion
-            base_out_matched = r_back * pair_q
-            base_in_matched = (pair_q / r_front) if r_front != 0 else Decimal(0)
-            pnl_trade_base = base_out_matched - base_in_matched
-            revenue_base_raw = int(
-                pnl_trade_base.to_integral_value(rounding="ROUND_FLOOR")
-            )
+            revenue_base_raw = 0
 
             # Convert gas (wei) to base token raw (USD-stable) before subtracting
             gas_fee_wei_attacker = _attacker_gas_fee_wei(front, back) or 0
             harm_base_raw = 0
-            profit_base_raw = revenue_base_raw
+            profit_base_raw = 0
 
             rows_to_insert.append(
                 dict(
                     chain_id=front.chain_id,
+                    defi_pool_id=pool.id,
                     front_attack_swap_id=front.id,
                     victim_swap_id=victim.id,
                     back_attack_swap_id=back.id,
+                    defi_version_id=1, # uniswap-v2
                     attacker_address=attacker_address,
                     victim_address=victim_address,
                     base_token_id=base_token_id,
@@ -418,7 +408,7 @@ SELECT * FROM victims
     return inserted
 
 
-CHAIN_ID = 4  # Polygon
+CHAIN_ID = 1
 
 
 async def detect_and_insert_for_v2_pools(session: AsyncSession):

@@ -37,6 +37,7 @@ dependencies = [
     "python-multipart>=0.0.20",
     "requests>=2.32.3",
     "ruff>=0.11.7",
+    "scalar-fastapi>=1.4.2",
     "sqlalchemy>=2.0.40",
     "stripe>=12.1.0",
     "tqdm>=4.67.1",
