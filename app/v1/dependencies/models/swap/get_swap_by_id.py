@@ -6,11 +6,10 @@ from app.dependencies.repositories.swap_repository import (
     get_swap_repository,
 )
 
+
 async def get_swap_by_id(
     swap_id: str,
-    swap_repository: SwapRepository = Depends(
-        get_swap_repository
-    ),
+    swap_repository: SwapRepository = Depends(get_swap_repository),
 ) -> Swap:
     swap = await swap_repository.find_by_or_raise(
         id=decode_id(swap_id),

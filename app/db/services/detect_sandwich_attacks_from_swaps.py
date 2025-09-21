@@ -11,10 +11,7 @@ from app.models.transaction import Transaction
 from app.models.defi_pool import DefiPool
 from app.models.defi_factory import DefiFactory
 from app.models.defi_version import DefiVersion
-from app.models.chain import Chain
 from app.models.usd_stable_coin import UsdStableCoin
-from google.cloud.bigquery import QueryJobConfig, ScalarQueryParameter
-from app.lib.utils.bq_client import bq_client
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from app.models.sandwich_attack import SandwichAttack
 
@@ -99,183 +96,6 @@ def _get_amount_out(amount_in: int, reserve_in: int, reserve_out: int) -> int:
     num = amt_in_fee * reserve_out
     den = reserve_in * FEE_DEN + amt_in_fee
     return 0 if den == 0 else num // den
-
-
-def _get_amount_out_with_fee(
-    amount_in: int, reserve_in: int, reserve_out: int, fee_bps: int
-) -> int:
-    if amount_in <= 0 or reserve_in <= 0 or reserve_out <= 0:
-        return 0
-    fee_bps = int(fee_bps or 0)
-    fee_den = 10_000
-    fee_num = fee_den - fee_bps
-    amt_in_fee = amount_in * fee_num
-    num = amt_in_fee * reserve_out
-    den = reserve_in * fee_den + amt_in_fee
-    return 0 if den == 0 else num // den
-
-
-async def _get_reserves_before_a1_placeholder(
-    session: AsyncSession, *, defi_pool_id: int, block_number: int, log_index: int
-) -> Optional[tuple[int, int]]:
-    """Fetch reserves (r0,r1) just before a given swap (A1) for v2 pools.
-
-    Strategy:
-      - Query BigQuery logs for the latest UniswapV2 Pair Sync event for the pool
-        strictly before (block_number, log_index).
-      - Decode reserves from the event data and return as integers.
-
-    Returns None when BigQuery is unavailable, dataset is missing, no prior Sync
-    exists, or the pool is non‑v2 (no Sync events).
-    """
-    # Resolve pool address and chain dataset
-    q = (
-        select(DefiPool.address, Chain.big_query_table_id)
-        .join(Chain, Chain.id == DefiPool.chain_id)
-        .where(DefiPool.id == defi_pool_id)
-    )
-    row = (await session.execute(q)).first()
-    if not row:
-        return None
-    pool_addr, dataset = row[0], row[1]
-    if (
-        not pool_addr
-        or not dataset
-        or not bq_client
-        or not QueryJobConfig
-        or not ScalarQueryParameter
-    ):
-        return None
-
-    # Build BigQuery SQL to fetch the latest Sync before (block, log_index)
-    sql = r"""
-DECLARE dataset    STRING DEFAULT @dataset;
-DECLARE logs_table STRING DEFAULT CONCAT(dataset, ".logs");
-DECLARE pool       STRING DEFAULT @pool;
-DECLARE blk        INT64  DEFAULT @blk;
-DECLARE logi       INT64  DEFAULT @logi;
-DECLARE topic_sync STRING DEFAULT @topic_sync;
-
-EXECUTE IMMEDIATE (
-  '''
-    SELECT
-      l.data         AS data,
-      l.block_number AS block_number,
-      l.log_index    AS log_index
-    FROM ''' || logs_table || ''' AS l
-    WHERE LOWER(l.address) = @pool
-      AND l.topics[SAFE_OFFSET(0)] = @topic_sync
-      AND (
-        l.block_number < @blk OR (l.block_number = @blk AND l.log_index < @logi)
-      )
-    ORDER BY l.block_number DESC, l.log_index DESC
-    LIMIT 1
-  '''
-)
-USING
-  dataset    AS dataset,
-  pool       AS pool,
-  blk        AS blk,
-  logi       AS logi,
-  topic_sync AS topic_sync;
-"""
-
-    client = bq_client()
-    job_config = QueryJobConfig(
-        query_parameters=[
-            ScalarQueryParameter("dataset", "STRING", str(dataset)),
-            ScalarQueryParameter("pool", "STRING", str(pool_addr).lower()),
-            ScalarQueryParameter("blk", "INT64", int(block_number)),
-            ScalarQueryParameter("logi", "INT64", int(log_index)),
-            ScalarQueryParameter("topic_sync", "STRING", TOPIC_SYNC_V2),
-        ]
-    )
-
-    def _run_query():
-        return client.query(sql, job_config=job_config)
-
-    # Run in thread to avoid blocking the event loop
-    import asyncio as _asyncio
-
-    try:
-        job = await _asyncio.to_thread(_run_query)
-    except Exception:
-        return None
-
-    row_it = iter(job)
-    try:
-        r = next(row_it)
-    except StopIteration:
-        return None
-
-    data_hex = str(r["data"]) if "data" in r else str(r[0])
-    if data_hex.startswith("0x"):
-        data_hex = data_hex[2:]
-    try:
-        b = bytes.fromhex(data_hex)
-    except ValueError:
-        return None
-    # V2 Sync: (uint112 reserve0, uint112 reserve1) left-padded to 32 bytes each
-    if len(b) < 64:
-        return None
-    r0 = int.from_bytes(b[0:32], byteorder="big")
-    r1 = int.from_bytes(b[32:64], byteorder="big")
-    return (r0, r1)
-
-
-async def _compute_harm_base_raw(
-    session: AsyncSession,
-    pool: DefiPool,
-    front: SwapRow,
-    victim: SwapRow,
-) -> int:
-    reserves = await _get_reserves_before_a1_placeholder(
-        session,
-        defi_pool_id=pool.id,
-        block_number=front.block_number,
-        log_index=front.log_index,
-    )
-    if reserves is None:
-        return 0
-    r0, r1 = reserves
-    base_is_token0 = front.sell_token_id == pool.token0_id
-
-    v_a0i = int(victim.amount0_in_raw)
-    v_a1i = int(victim.amount1_in_raw)
-    v_a0o = int(victim.amount0_out_raw)
-    v_a1o = int(victim.amount1_out_raw)
-
-    if v_a0i > 0 and v_a1o > 0 and v_a1i == 0 and v_a0o == 0:
-        cf_token1 = _get_amount_out(v_a0i, int(r0), int(r1))
-        delta_token1 = cf_token1 - v_a1o
-        if base_is_token0:
-            price0_per_1 = 0 if r1 == 0 else (Decimal(r0) / Decimal(r1))
-            harm = int(
-                (Decimal(delta_token1) * price0_per_1).to_integral_value(
-                    rounding="ROUND_HALF_EVEN"
-                )
-            )
-        else:
-            harm = delta_token1
-    elif v_a1i > 0 and v_a0o > 0 and v_a0i == 0 and v_a1o == 0:
-        cf_token0 = _get_amount_out(v_a1i, int(r1), int(r0))
-        delta_token0 = cf_token0 - v_a0o
-        if base_is_token0:
-            harm = delta_token0
-        else:
-            price0_per_1 = 0 if r1 == 0 else (Decimal(r0) / Decimal(r1))
-            harm = (
-                0
-                if price0_per_1 == 0
-                else int(
-                    (Decimal(delta_token0) / price0_per_1).to_integral_value(
-                        rounding="ROUND_HALF_EVEN"
-                    )
-                )
-            )
-    else:
-        harm = 0
-    return harm
 
 
 async def detect_and_insert_for_pool(
@@ -532,9 +352,7 @@ SELECT * FROM victims
 
             # Convert gas (wei) to base token raw (USD-stable) before subtracting
             gas_fee_wei_attacker = _attacker_gas_fee_wei(front, back) or 0
-            harm_base_raw = await _compute_harm_base_raw(
-                session, pool=pool, front=front, victim=victim
-            )
+            harm_base_raw = 0
             profit_base_raw = revenue_base_raw
 
             rows_to_insert.append(

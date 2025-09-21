@@ -9,7 +9,7 @@ from app.v1.schemas.sandwich_attack.search_params import (
 def get_sandwich_attack_search_params(
     limit: int = Query(10, ge=1, le=100),
     offset: int = Query(0, ge=0),
-    sorted_by: str = Query("front_attack_swap__transaction__block_timestamp"),
+    sorted_by: str = Query("block_timestamp"),
     sorted_order: str = Query("desc"),
     chain_id__in: Optional[list[str]] = Query(None),
     victim_address__exact__or__attacker_address__exact: Optional[str] = Query(None),
@@ -27,6 +27,8 @@ def get_sandwich_attack_search_params(
     created_at__lte: Optional[datetime] = Query(None),
     updated_at__gte: Optional[datetime] = Query(None),
     updated_at__lte: Optional[datetime] = Query(None),
+    block_timestamp__gte: Optional[datetime] = Query(None),
+    block_timestamp__lte: Optional[datetime] = Query(None),
 ) -> SandwichAttackSearchParams:
     return SandwichAttackSearchParams(
         limit=limit,
@@ -49,4 +51,6 @@ def get_sandwich_attack_search_params(
         created_at__lte=created_at__lte,
         updated_at__gte=updated_at__gte,
         updated_at__lte=updated_at__lte,
+        block_timestamp__gte=block_timestamp__gte,
+        block_timestamp__lte=block_timestamp__lte,
     )

@@ -111,6 +111,12 @@
       "type": "TIMESTAMP",
       "nullable": false,
       "default": "now()"
+    },
+    {
+      "name": "explorer_url",
+      "type": "VARCHAR",
+      "nullable": false,
+      "default": "''::character varying"
     }
   ],
   "tokens": [
@@ -167,6 +173,12 @@
       "type": "TIMESTAMP",
       "nullable": false,
       "default": "now()"
+    },
+    {
+      "name": "logo_url",
+      "type": "VARCHAR",
+      "nullable": true,
+      "default": "None"
     }
   ],
   "wrapped_native_tokens": [
@@ -691,7 +703,7 @@
     {
       "name": "victim_address",
       "type": "VARCHAR",
-      "nullable": true,
+      "nullable": false,
       "default": "None"
     },
     {
@@ -759,6 +771,30 @@
       "type": "NUMERIC(78, 0)",
       "nullable": false,
       "default": "None"
+    },
+    {
+      "name": "defi_version_id",
+      "type": "INTEGER",
+      "nullable": false,
+      "default": "None"
+    },
+    {
+      "name": "defi_pool_id",
+      "type": "INTEGER",
+      "nullable": false,
+      "default": "None"
+    },
+    {
+      "name": "gas_fee_base_raw",
+      "type": "NUMERIC(78, 0)",
+      "nullable": false,
+      "default": "'0'::numeric"
+    },
+    {
+      "name": "block_timestamp",
+      "type": "TIMESTAMP",
+      "nullable": false,
+      "default": "now()"
     }
   ]
 }

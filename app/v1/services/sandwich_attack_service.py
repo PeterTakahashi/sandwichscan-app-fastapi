@@ -24,6 +24,7 @@ class SandwichAttackService:
         """
         Retrieve a list of sandwich_attacks with filtering, sorting, and pagination.
         """
+        print(search_params)
         sandwich_attacks = await self.sandwich_attack_repository.where(
             **search_params.model_dump(exclude_none=True),
             joinedload_models=[

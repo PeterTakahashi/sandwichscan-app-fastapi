@@ -22,6 +22,8 @@ class SandwichAttackSearchParams(BaseSearchParams):
     created_at__lte: Optional[datetime] = None
     updated_at__gte: Optional[datetime] = None
     updated_at__lte: Optional[datetime] = None
+    block_timestamp__gte: Optional[datetime] = None
+    block_timestamp__lte: Optional[datetime] = None
 
     @field_validator("chain_id__in", mode="before")
     @classmethod

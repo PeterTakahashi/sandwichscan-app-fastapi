@@ -1,9 +1,10 @@
 from typing import TYPE_CHECKING
 from app.db.base import Base
-from sqlalchemy import String, Numeric
+from sqlalchemy import String, Numeric, DateTime, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.models.mixin.timestamp import TimestampMixin
 from sqlalchemy import ForeignKey, UniqueConstraint, Index
+from datetime import datetime
 
 if TYPE_CHECKING:
     from app.models.chain import Chain
@@ -50,13 +51,16 @@ class SandwichAttack(TimestampMixin, Base):
     )
 
     attacker_address: Mapped[str] = mapped_column(String, nullable=False)
-    victim_address: Mapped[str | None] = mapped_column(String, nullable=True)
+    victim_address: Mapped[str] = mapped_column(String, nullable=False)
 
     base_token_id: Mapped[int | None] = mapped_column(
         ForeignKey("tokens.id", ondelete="SET NULL"), nullable=True, index=True
     )
 
     revenue_base_raw: Mapped[int] = mapped_column(
+        Numeric(78, 0), nullable=False, default=0
+    )
+    gas_fee_base_raw: Mapped[int] = mapped_column(
         Numeric(78, 0), nullable=False, default=0
     )
     gas_fee_wei_attacker: Mapped[int] = mapped_column(
@@ -73,6 +77,11 @@ class SandwichAttack(TimestampMixin, Base):
     cost_usd: Mapped[float | None] = mapped_column(Numeric(38, 18), nullable=True)
     profit_usd: Mapped[float | None] = mapped_column(Numeric(38, 18), nullable=True)
     harm_usd: Mapped[float | None] = mapped_column(Numeric(38, 18), nullable=True)
+
+    # set front attack swap's transaction's block timestamp as the sandwich attack's block timestamp
+    block_timestamp: Mapped[datetime] = mapped_column(
+        DateTime(timezone=False), server_default=func.now(), nullable=False
+    )
 
     __table_args__ = (
         UniqueConstraint(

@@ -22,7 +22,7 @@ class SandwichAttackRead(HasEncodedID):
     )
 
     attacker_address: str = Field(..., description="The address of the attacker.")
-    victim_address: str | None = Field(None, description="The address of the victim.")
+    victim_address: str = Field(..., description="The address of the victim.")
 
     base_token: TokenRead | None = Field(
         None, description="The base token of the sandwich attack."
@@ -39,6 +39,9 @@ class SandwichAttackRead(HasEncodedID):
         ...,
         description="The revenue of the sandwich attack in base token (raw amount).",
     )
+    gas_fee_base_raw: int = Field(
+        ..., description="The gas fee paid by the attacker in base token (raw amount)."
+    )
     gas_fee_wei_attacker: int = Field(
         ..., description="The gas fee paid by the attacker in wei."
     )
@@ -47,6 +50,24 @@ class SandwichAttackRead(HasEncodedID):
     )
     harm_base_raw: int = Field(
         ..., description="The harm caused to the victim in base token (raw amount)."
+    )
+
+    revenue_usd: float | None = Field(
+        None, description="The revenue of the sandwich attack in USD."
+    )
+    cost_usd: float | None = Field(
+        None, description="The cost of the sandwich attack in USD."
+    )
+    profit_usd: float | None = Field(
+        None, description="The profit of the sandwich attack in USD."
+    )
+    harm_usd: float | None = Field(
+        None, description="The harm caused to the victim in USD."
+    )
+
+    block_timestamp: datetime = Field(
+        ...,
+        description="The block timestamp of the sandwich attack (from the front-running swap).",
     )
 
     created_at: datetime = Field(..., description="Record creation timestamp.")
