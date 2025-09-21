@@ -21,10 +21,6 @@ from decimal import Decimal, getcontext
 
 getcontext().prec = 60
 
-
-# Uniswap V2 Pair Sync event topic
-TOPIC_SYNC_V2 = "0x1c411e9a96e071241c2f21f7726b17ae89e3cab4c78be50e062b03a9fffbbad1"
-
 # Block scanning batch size for SQL windowing
 BLOCK_BATCH = 100000
 
@@ -82,18 +78,6 @@ def _attacker_gas_fee_wei(
                 total += int(s.gas_used) * int(gp)
                 known = True
     return total if known else None
-
-
-def _get_amount_out(amount_in: int, reserve_in: int, reserve_out: int) -> int:
-    FEE_NUM = 997
-    FEE_DEN = 1000
-    if amount_in <= 0 or reserve_in <= 0 or reserve_out <= 0:
-        return 0
-    amt_in_fee = amount_in * FEE_NUM
-    num = amt_in_fee * reserve_out
-    den = reserve_in * FEE_DEN + amt_in_fee
-    return 0 if den == 0 else num // den
-
 
 async def detect_and_insert_for_pool(
     session: AsyncSession,
