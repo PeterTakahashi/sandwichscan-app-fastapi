@@ -16,6 +16,16 @@ from app.db.base import Base
 from app.core.config import settings
 
 from app.models.chain import Chain
+from app.models.defi import Defi
+from app.models.defi_version import DefiVersion
+from app.models.defi_factory import DefiFactory
+from app.models.defi_pool import DefiPool
+from app.models.token import Token
+from app.models.transaction import Transaction
+from app.models.swap import Swap
+from app.models.sandwich_attack import SandwichAttack
+from app.models.usd_stable_coin import UsdStableCoin
+from app.models.wrapped_native_token import WrappedNativeToken
 
 load_dotenv()
 

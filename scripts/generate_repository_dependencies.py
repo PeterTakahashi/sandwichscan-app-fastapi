@@ -1,9 +1,9 @@
 from pathlib import Path
 
-REPO_DIR = Path("app/v1/repositories")
-DEPENDENCY_DIR = Path("app/v1/dependencies/repositories")
+REPO_DIR = Path("app/repositories")
+DEPENDENCY_DIR = Path("app/dependencies/repositories")
 
-template = """from app.v1.repositories.{module} import {class_name}
+template = """from app.repositories.{module} import {class_name}
 from app.db.session import get_async_session
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import Depends

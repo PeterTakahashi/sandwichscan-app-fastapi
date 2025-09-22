@@ -44,13 +44,10 @@ jobs:
           done
           echo "Sendria is ready!"
 
-      - name: Setup environment
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y curl g++ wget ffmpeg libsm6 libxext6 gimp libvulkan1 cargo libpq-dev
-          # (省略) ここ以降はすでにある手順
-          curl -LsSf https://astral.sh/uv/install.sh | env UV_INSTALL_DIR="$HOME/.local/bin" sh
-          echo "PATH=$HOME/.local/bin:$PATH" >> $GITHUB_ENV
+      - name: Install the latest version of uv and set the python version to 3.11
+        uses: astral-sh/setup-uv@v6
+        with:
+          python-version: 3.11
 
       - name: Install dependencies
         run: |

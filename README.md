@@ -43,7 +43,7 @@ exit # Exit the container
   docker exec -it sandwichscan-web bash
   source .venv/bin/activate
   alembic revision --autogenerate -m "Your migration message here"
-  python -m app.db.seed
+  alembic upgrade head
   ```
 - **Apply database migrations:**
   ```bash
@@ -89,3 +89,19 @@ exit # Exit the container
   ruff check .
   mypy --config-file mypy.ini .
   ```
+
+### insert blockchain data from bigquery
+
+```sh
+python -m app.db.services.backfill_from_bigquery
+```
+
+```sh
+python -m app.db.services.backfill_transactions_uniswap_from_bigquery
+```
+
+### sql dump
+
+```sh
+docker exec -t sandwichscan-db pg_dump -U postgres -d sandwichscan_dev > dump.sql
+```

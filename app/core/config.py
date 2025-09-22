@@ -20,34 +20,15 @@ class Settings(BaseSettings):
     BACKEND_API_V1_URL: str = os.getenv(
         "BACKEND_API_V1_URL", "http://127.0.0.1:8000/app/v1"
     )
-    RESET_PASSWORD_TOKEN_SECRET: str = "SECRET"
-    VERIFICATION_TOKEN_SECRET: str = "SECRET"
-    JWT_SECRET: str = "SECRET"
     HASHIDS_MIN_LENGTH: int = 12
     HASHIDS_SALT: str = os.getenv("HASHIDS_SALT", "SECRET")
-    ACCESS_TOKEN_EXPIRED_SECONDS: int = 3600 * 24 * 7  # 1 week
-
-    STRIPE_API_KEY: str = os.getenv("STRIPE_API_KEY", "")
-    STRIPE_WEBHOOK_SECRET: str = os.getenv("STRIPE_WEBHOOK_SECRET", "")
-
-    GITHUB_CLIENT_ID: str = os.getenv("GITHUB_CLIENT_ID", "")
-    GITHUB_CLIENT_SECRET: str = os.getenv("GITHUB_CLIENT_SECRET", "")
-    GOOGLE_CLIENT_ID: str = os.getenv("GOOGLE_CLIENT_ID", "")
-    GOOGLE_CLIENT_SECRET: str = os.getenv("GOOGLE_CLIENT_SECRET", "")
-
-    USE_CREDENTIALS: bool = env == "prod"
-    VALIDATE_CERTS: bool = env == "prod"
-    SECURE_COOKIES: bool = env == "prod"
     ENV: str = env
 
-    PAYMENT_CURRENCY: str = "usd"
-
-    AUTHENTICATE_MAX_FAILED_ATTEMPTS: int = 5
-    ADMIN_USERNAME: str = os.getenv("ADMIN_USERNAME", "admin")
-    ADMIN_PASSWORD: str = os.getenv("ADMIN_PASSWORD", "password")
-
-    STRIPE_PERSONAL_TAX_CODE: str = "txcd_10103000"
-    STRIPE_BUSINESS_TAX_CODE: str = "txcd_10103001"
+    ALCHEMY_API_KEY: str = os.getenv("ALCHEMY_API_KEY", "")
+    GOOGLE_CLOUD_PROJECT: str = os.getenv("GOOGLE_CLOUD_PROJECT", "")
+    GOOGLE_APPLICATION_CREDENTIALS: str = os.getenv(
+        "GOOGLE_APPLICATION_CREDENTIALS", ""
+    )
 
 
 settings = Settings()

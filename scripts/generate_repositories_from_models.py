@@ -1,7 +1,7 @@
 from pathlib import Path
 
 MODELS_DIR = Path("app/models")
-REPO_DIR = Path("app/v1/repositories")
+REPO_DIR = Path("app/repositories")
 BASE_REPO_IMPORT = "from fastapi_repository import BaseRepository"
 SQLALCHEMY_IMPORT = "from sqlalchemy.ext.asyncio import AsyncSession"
 

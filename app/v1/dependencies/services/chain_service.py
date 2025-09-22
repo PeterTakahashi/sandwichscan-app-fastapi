@@ -1,7 +1,7 @@
 from fastapi import Depends
 from app.v1.services.chain_service import ChainService
 from app.repositories.chain_repository import ChainRepository
-from app.v1.dependencies.repositories.chain_repository import (
+from app.dependencies.repositories.chain_repository import (
     get_chain_repository,
 )
 

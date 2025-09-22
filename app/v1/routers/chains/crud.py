@@ -11,9 +11,9 @@ from app.v1.dependencies.services.chain_service import get_chain_service
 from app.v1.services.chain_service import ChainService
 from app.models.chain import Chain
 
-from app.core.routers.auth_api_router import AuthAPIRouter
+from app.core.routers.api_router import APIRouter
 
-router = AuthAPIRouter(prefix="/chains", tags=["Chains"])
+router = APIRouter(prefix="/chains", tags=["Chains"])
 
 
 @router.get(
