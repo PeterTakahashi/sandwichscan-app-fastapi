@@ -2,9 +2,9 @@ from typing import AsyncGenerator
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from app.core.config import settings
 
-DATABASE_URL = settings.DATABASE_URL
+ASYNC_DATABASE_URL = settings.ASYNC_DATABASE_URL
 engine = create_async_engine(
-    DATABASE_URL,
+    ASYNC_DATABASE_URL,
     pool_size=20,
     max_overflow=40,
     pool_pre_ping=True,

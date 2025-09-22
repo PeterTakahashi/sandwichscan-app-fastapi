@@ -12,8 +12,8 @@ load_dotenv(dotenv_path=dotenv_path, override=True)
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "SandwichScan API"
-    DATABASE_URL: str = os.getenv(
-        "DATABASE_URL",
+    ASYNC_DATABASE_URL: str = os.getenv(
+        "ASYNC_DATABASE_URL",
         "postgresql+asyncpg://postgres:postgres@db:5432/sandwichscan_dev",
     )
     FRONTEND_URL: str = os.getenv("FRONTEND_URL", "http://127.0.0.1:5173")
@@ -34,4 +34,4 @@ class Settings(BaseSettings):
 settings = Settings()
 
 print("Loading environment variables...")
-print(f"DATABASE_URL: {settings.DATABASE_URL}")
+print(f"ASYNC_DATABASE_URL: {settings.ASYNC_DATABASE_URL}")

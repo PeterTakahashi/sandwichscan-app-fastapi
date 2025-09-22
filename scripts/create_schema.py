@@ -13,18 +13,18 @@ logger = logging.getLogger(__name__)
 
 # Load environment variables from .env file
 load_dotenv()
-DATABASE_URL = os.getenv("DATABASE_URL")
+ASYNC_DATABASE_URL = os.getenv("ASYNC_DATABASE_URL") or ''
 
-if not DATABASE_URL:
-    logger.error("❌ DATABASE_URL could not be loaded from .env")
+if not ASYNC_DATABASE_URL:
+    logger.error("❌ ASYNC_DATABASE_URL could not be loaded from .env")
     exit(1)
 
 
 async def create_schema():
     logger.info("🔌 Connecting to the database...")
-    engine = create_async_engine(DATABASE_URL)
+    engine = create_async_engine(ASYNC_DATABASE_URL)
     async with engine.begin() as conn:
-        logger.info(f"Connected to: {DATABASE_URL}")
+        logger.info(f"Connected to: {ASYNC_DATABASE_URL}")
         metadata = MetaData()
         await conn.run_sync(metadata.reflect)
 

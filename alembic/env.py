@@ -29,7 +29,7 @@ from app.models.wrapped_native_token import WrappedNativeToken
 
 load_dotenv()
 
-sync_url = settings.DATABASE_URL.replace("+asyncpg", "")
+sync_url = settings.ASYNC_DATABASE_URL.replace("+asyncpg", "")
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
