@@ -1,0 +1,7 @@
+build:
+  docker:
+    web: Dockerfile.prod
+
+run:
+  web: .venv/bin/gunicorn -k uvicorn.workers.UvicornWorker -w ${WEB_CONCURRENCY:-2} -b 0.0.0.0:${PORT} main:app
+  release: .venv/bin/alembic upgrade head
