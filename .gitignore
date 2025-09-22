@@ -52,3 +52,4 @@ htmlcov
 google_credential.json
 
 dump.sql
+backup.sql

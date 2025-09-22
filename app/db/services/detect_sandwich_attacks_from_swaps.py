@@ -79,6 +79,7 @@ def _attacker_gas_fee_wei(
                 known = True
     return total if known else None
 
+
 async def detect_and_insert_for_pool(
     session: AsyncSession,
     defi_pool_id: int,

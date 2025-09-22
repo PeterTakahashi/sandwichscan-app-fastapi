@@ -6,7 +6,7 @@ from app.models.sandwich_attack import SandwichAttack
 from app.db.session import async_session_maker
 from datetime import datetime
 
-LIMIT = 13306
+LIMIT = 999999999
 
 
 async def update_block_timestamp_on_sandwich_attack(session: AsyncSession):

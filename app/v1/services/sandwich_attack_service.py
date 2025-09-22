@@ -2,6 +2,7 @@ from app.v1.schemas.sandwich_attack import (
     SandwichAttackRead,
     SandwichAttackListRead,
     SandwichAttackSearchParams,
+    SandwichAttackReadByMonth,
 )
 from app.repositories.sandwich_attack_repository import SandwichAttackRepository
 
@@ -81,3 +82,27 @@ class SandwichAttackService:
             ),
             data=[SandwichAttackRead.model_validate(tx) for tx in sandwich_attacks],
         )
+
+    async def get_read_by_month(
+        self, search_params: SandwichAttackSearchParams
+    ) -> list[SandwichAttackReadByMonth]:
+        """
+        Retrieve a list of sandwich_attacks aggregated by month with filtering.
+        """
+        results = await self.sandwich_attack_repository.aggregate_by_month(
+            **search_params.model_dump(
+                exclude_none=True,
+                exclude={"limit", "offset", "sorted_by", "sorted_order"},
+            ),
+        )
+
+        return [
+            SandwichAttackReadByMonth(
+                month=result.month,
+                total_attacks=result.total_attacks,
+                total_revenue_usd=result.total_revenue_usd,
+                total_profit_usd=result.total_profit_usd,
+                total_harm_usd=result.total_harm_usd,
+            )
+            for result in results
+        ]

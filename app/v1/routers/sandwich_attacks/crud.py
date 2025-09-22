@@ -3,6 +3,7 @@ from app.v1.schemas.sandwich_attack import (
     SandwichAttackListRead,
     SandwichAttackRead,
     SandwichAttackSearchParams,
+    SandwichAttackReadByMonth,
 )
 from app.v1.dependencies.models.sandwich_attack.get_sandwich_attack_by_id import (
     get_sandwich_attack_by_id,
@@ -37,6 +38,24 @@ async def list_sandwich_attacks(
     Retrieve a list of sandwich_attacks with filtering, sorting, and pagination.
     """
     return await service.get_list(search_params=search_params)
+
+
+@router.get(
+    "/by_month",
+    response_model=list[SandwichAttackReadByMonth],
+    name="sandwich_attacks:read_by_month",
+)
+async def read_sandwich_attacks_by_month(
+    request: Request,
+    search_params: SandwichAttackSearchParams = Depends(
+        get_sandwich_attack_search_params
+    ),
+    service: SandwichAttackService = Depends(get_sandwich_attack_service),
+):
+    """
+    Retrieve a list of sandwich_attacks with filtering, sorting, and pagination.
+    """
+    return await service.get_read_by_month(search_params=search_params)
 
 
 @router.get(
