@@ -44,10 +44,10 @@ jobs:
           done
           echo "Sendria is ready!"
 
-      - name: Install the latest version of uv and set the python version to 3.11t
+      - name: Install the latest version of uv and set the python version to 3.11
         uses: astral-sh/setup-uv@v6
         with:
-          python-version: 3.11t
+          python-version: 3.11
 
       - name: Install dependencies
         run: |
