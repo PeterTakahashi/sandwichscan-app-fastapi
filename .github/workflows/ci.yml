@@ -52,7 +52,7 @@ jobs:
       - name: Install dependencies
         run: |
           uv python install 3.11.11
-          uv venv
+          uv venv --python 3.11
           uv pip install .
           uv pip install --group dev
 
