@@ -13,7 +13,5 @@ class TokenRead(HasEncodedID):
         ..., description="Indicates if the token decimals are invalid."
     )
     logo_url: str | None = Field(None, description="URL of the token logo.")
-    created_at: datetime = Field(..., description="Record creation timestamp.")
-    updated_at: datetime = Field(..., description="Record update timestamp.")
 
     model_config = ConfigDict(from_attributes=True)

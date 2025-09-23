@@ -1,5 +1,5 @@
 from app.v1.schemas.sandwich_attack import (
-    SandwichAttackRead,
+    SandwichAttackReadOnList,
     SandwichAttackListRead,
     SandwichAttackSearchParams,
     SandwichAttackReadByMonth,
@@ -31,17 +31,8 @@ class SandwichAttackService:
             **search_params.model_dump(exclude_none=True),
             joinedload_models=[
                 SandwichAttack.chain,
-                SandwichAttack.defi_pool,
                 (SandwichAttack.front_attack_swap, Swap.sell_token),
                 (SandwichAttack.front_attack_swap, Swap.buy_token),
-                (SandwichAttack.front_attack_swap, Swap.transaction),
-                (SandwichAttack.victim_swap, Swap.sell_token),
-                (SandwichAttack.victim_swap, Swap.buy_token),
-                (SandwichAttack.victim_swap, Swap.transaction),
-                (SandwichAttack.back_attack_swap, Swap.sell_token),
-                (SandwichAttack.back_attack_swap, Swap.buy_token),
-                (SandwichAttack.back_attack_swap, Swap.transaction),
-                SandwichAttack.base_token,
                 (SandwichAttack.defi_version, DefiVersion.defi),
             ],  # Eager load relationships
         )
@@ -80,7 +71,7 @@ class SandwichAttackService:
                 total_harm_usd=total_harm_usd,
                 **search_params.model_dump(exclude_none=True),
             ),
-            data=[SandwichAttackRead.model_validate(tx) for tx in sandwich_attacks],
+            data=[SandwichAttackReadOnList.model_validate(tx) for tx in sandwich_attacks],
         )
 
     async def get_read_by_month(
