@@ -71,7 +71,9 @@ class SandwichAttackService:
                 total_harm_usd=total_harm_usd,
                 **search_params.model_dump(exclude_none=True),
             ),
-            data=[SandwichAttackReadOnList.model_validate(tx) for tx in sandwich_attacks],
+            data=[
+                SandwichAttackReadOnList.model_validate(tx) for tx in sandwich_attacks
+            ],
         )
 
     async def get_read_by_month(

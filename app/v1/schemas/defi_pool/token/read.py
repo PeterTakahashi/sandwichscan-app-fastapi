@@ -1,4 +1,3 @@
-from datetime import datetime
 from pydantic import Field, ConfigDict
 from app.v1.schemas.common.id_encoder import HasEncodedID
 from app.models.enums.token import TokenType

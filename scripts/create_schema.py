@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 # Load environment variables from .env file
 load_dotenv()
-ASYNC_DATABASE_URL = os.getenv("ASYNC_DATABASE_URL") or ''
+ASYNC_DATABASE_URL = os.getenv("ASYNC_DATABASE_URL") or ""
 
 if not ASYNC_DATABASE_URL:
     logger.error("❌ ASYNC_DATABASE_URL could not be loaded from .env")

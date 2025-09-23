@@ -12,5 +12,4 @@ class SwapReadOnList(HasEncodedID):
         None, description="The token being bought in the swap."
     )
 
-
     model_config = ConfigDict(from_attributes=True)
