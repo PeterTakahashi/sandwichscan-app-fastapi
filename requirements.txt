@@ -38,7 +38,7 @@ eth-utils==5.3.1
 execnet==2.1.1
 factory-boy==3.3.3
 faker==37.1.0
-fastapi==0.115.12
+fastapi==0.119.0
 fastapi-repository==0.1.0
 freezegun==1.5.1
 frozenlist==1.6.0
